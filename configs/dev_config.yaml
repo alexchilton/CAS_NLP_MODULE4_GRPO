@@ -21,7 +21,7 @@ model:
 
 data:
   dataset_name: "predibase/wordle-grpo"
-  train_split: "train[:10]"
+  train_split: "train[:100]"  # Use 100 training samples
   word_list_path: "data/wordle_word_list.csv"
 
 output:
