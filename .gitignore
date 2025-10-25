@@ -66,11 +66,14 @@ wandb/
 evaluation_results/
 eval_results/
 
-# Data cache
+# Data cache (but keep word list CSV)
 data/cache/
 data/download_metadata.json
 *.cache
 cache/
+
+# Keep word list
+!data/wordle_word_list.csv
 
 # HuggingFace cache
 .cache/

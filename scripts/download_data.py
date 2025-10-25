@@ -202,8 +202,7 @@ def download_word_list(data_dir: Path) -> bool:
     """
     Download or verify word list CSV.
 
-    The word list might be embedded in the datasets, or we might need
-    to extract it. This function handles that.
+    Downloads the official Wordle word list from GitHub.
 
     Args:
         data_dir: Directory to save word list
@@ -211,65 +210,45 @@ def download_word_list(data_dir: Path) -> bool:
     Returns:
         True if successful, False otherwise
     """
-    print("\nChecking for word list...")
+    print("\nDownloading word list...")
 
-    word_list_path = data_dir / "word_list.csv"
+    word_list_path = data_dir / "wordle_word_list.csv"
+    word_list_url = "https://raw.githubusercontent.com/arnavgarg1/arnavgarg1/refs/heads/main/five_letter_words.csv"
 
     # Check if already exists
     if word_list_path.exists():
-        print(f"✓ Word list found at {word_list_path}")
+        print(f"✓ Word list already exists at {word_list_path}")
         try:
             with open(word_list_path, 'r') as f:
                 lines = f.readlines()
-                num_words = len([l for l in lines if l.strip() and not l.startswith('#')])
+                num_words = len([l for l in lines if l.strip() and not l.startswith('#') and l.strip() != 'Word'])
                 print(f"  Contains {num_words} words")
             return True
         except Exception as e:
             print(f"⚠️  Could not read word list: {e}")
 
-    # Try to extract from dataset
-    print("Word list not found locally")
-    print("Attempting to extract from dataset...")
+    # Download from GitHub
+    print(f"Downloading from {word_list_url}...")
 
     try:
-        from datasets import load_dataset
+        import urllib.request
 
-        # Try to load one of the datasets to extract word list
-        dataset = load_dataset(
-            "predibase/wordle-grpo",
-            cache_dir=str(data_dir / "cache"),
-            download_mode="reuse_dataset_if_exists"
-        )
+        # Download the file
+        word_list_path.parent.mkdir(parents=True, exist_ok=True)
+        urllib.request.urlretrieve(word_list_url, word_list_path)
 
-        # Extract unique words from dataset
-        words = set()
-        for split_name, split_data in dataset.items():
-            if 'word' in split_data.column_names:
-                words.update(split_data['word'])
-            elif 'secret_word' in split_data.column_names:
-                words.update(split_data['secret_word'])
-            elif 'target_word' in split_data.column_names:
-                words.update(split_data['target_word'])
+        # Count words
+        with open(word_list_path, 'r') as f:
+            lines = f.readlines()
+            num_words = len([l for l in lines if l.strip() and not l.startswith('#') and l.strip() != 'Word'])
 
-        if words:
-            # Save to CSV
-            word_list_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(word_list_path, 'w') as f:
-                f.write("# Wordle word list extracted from dataset\n")
-                f.write("word\n")
-                for word in sorted(words):
-                    f.write(f"{word}\n")
-
-            print(f"✓ Extracted {len(words)} words to {word_list_path}")
-            return True
-        else:
-            print("⚠️  Could not extract words from dataset")
-            print("   Word list may be embedded in prompts")
-            return False
+        print(f"✓ Downloaded {num_words} words to {word_list_path}")
+        return True
 
     except Exception as e:
-        print(f"⚠️  Could not extract word list: {e}")
-        print("   This is OK if word lists are embedded in the dataset prompts")
+        print(f"✗ Failed to download word list: {e}")
+        print("   You can manually download it from:")
+        print(f"   {word_list_url}")
         return False
 
 
