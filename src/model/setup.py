@@ -189,6 +189,42 @@ def _load_quantized_model(model_name: str) -> PreTrainedModel:
     return model
 
 
+def _get_target_modules(model: PreTrainedModel, config: Any) -> list:
+    """
+    Get appropriate LoRA target modules based on model architecture.
+
+    Args:
+        model: The model to apply LoRA to.
+        config: Configuration object (may contain target_modules override).
+
+    Returns:
+        List of module names to target with LoRA.
+    """
+    # If explicitly specified in config, use that
+    if hasattr(config.model, 'target_modules') and config.model.target_modules:
+        logger.info(f"Using target_modules from config: {config.model.target_modules}")
+        return config.model.target_modules
+
+    # Auto-detect based on model type
+    model_type = model.config.model_type.lower()
+
+    if "llama" in model_type:
+        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
+    elif "gpt2" in model_type or "gpt-2" in model_type:
+        target_modules = ["c_attn"]
+    elif "mistral" in model_type:
+        target_modules = ["q_proj", "k_proj", "v_proj", "o_proj"]
+    elif "phi" in model_type:
+        target_modules = ["q_proj", "k_proj", "v_proj", "dense"]
+    else:
+        # Default fallback - try common attention modules
+        logger.warning(f"Unknown model type '{model_type}', using default target modules")
+        target_modules = ["q_proj", "v_proj"]
+
+    logger.info(f"Auto-detected target_modules for {model_type}: {target_modules}")
+    return target_modules
+
+
 def _apply_lora(
     model: PreTrainedModel,
     config: Any,
@@ -211,11 +247,14 @@ def _apply_lora(
     if is_quantized:
         model = prepare_model_for_kbit_training(model)
 
+    # Get target modules (auto-detect or from config)
+    target_modules = _get_target_modules(model, config)
+
     # Configure LoRA
     lora_config = LoraConfig(
         r=config.model.lora_rank,
         lora_alpha=config.model.lora_alpha,
-        target_modules=config.model.target_modules,
+        target_modules=target_modules,
         lora_dropout=0.05,
         bias="none",
         task_type="CAUSAL_LM",
@@ -227,7 +266,7 @@ def _apply_lora(
     logger.info(
         f"LoRA applied: rank={config.model.lora_rank}, "
         f"alpha={config.model.lora_alpha}, "
-        f"target_modules={config.model.target_modules}"
+        f"target_modules={target_modules}"
     )
 
     return model

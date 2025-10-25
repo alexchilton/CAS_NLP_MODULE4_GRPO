@@ -238,12 +238,22 @@ def main():
 
         # 6. Initialize reward function
         print("\nStep 6/8: Initializing reward function...")
+
+        # Get word list path from config
+        word_list_path = None
+        if hasattr(config, 'data') and hasattr(config.data, 'word_list_path'):
+            word_list_path = Path(config.data.word_list_path)
+            if not word_list_path.is_absolute():
+                # Make relative paths relative to project root
+                word_list_path = Path(__file__).parent.parent / word_list_path
+
         reward_function = CombinedReward(
             format_weight=1.0,
             feedback_weight=0.5,
             value_weight=0.3,
+            word_list_path=word_list_path,
         )
-        logger.info("Reward function initialized (format=1.0, feedback=0.5, value=0.3)")
+        logger.info(f"Reward function initialized (format=1.0, feedback=0.5, value=0.3, word_list={word_list_path})")
 
         # 7. Initialize trainer
         print("\nStep 7/8: Initializing GRPO trainer...")

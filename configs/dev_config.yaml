@@ -12,15 +12,16 @@ training:
   learning_rate: 5e-5
 
 model:
-  name: "gpt2"  # Small model for testing
+  name: "gpt2"  # Options: "gpt2", "meta-llama/Llama-3.2-3B", etc.
   use_quantization: false
   lora_rank: 8
   lora_alpha: 16
-  target_modules: ["c_attn"]
+  # target_modules: auto-detected based on model architecture (can override here if needed)
 
 data:
   dataset_name: "predibase/wordle-grpo"
   train_split: "train[:10]"
+  word_list_path: "data/wordle_word_list.csv"
 
 output:
   checkpoint_dir: "./checkpoints_dev"

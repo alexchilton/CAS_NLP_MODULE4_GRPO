@@ -52,6 +52,7 @@ class WordleEvaluator:
         self.model = model
         self.tokenizer = tokenizer
         self.word_list = [w.upper().strip() for w in word_list]
+        self.word_set = set(self.word_list)  # Fast O(1) lookup for validation
         self.max_attempts = max_attempts
         self.reward_function = reward_function
 
@@ -127,7 +128,7 @@ class WordleEvaluator:
                 guess = None
 
             # Validate guess
-            if guess is None or len(guess) != 5 or guess not in self.word_list:
+            if guess is None or len(guess) != 5 or guess not in self.word_set:
                 if verbose:
                     logger.warning(f"Invalid guess: {guess}")
                 # Use random valid word as fallback

@@ -67,6 +67,17 @@ class WordleGRPOTrainer:
         self.learning_rate = float(config.training.learning_rate)
         self.gradient_accumulation_steps = int(config.training.gradient_accumulation_steps)
 
+        # Get word list path for reward functions
+        self.word_list_path = None
+        if hasattr(config, 'data') and hasattr(config.data, 'word_list_path'):
+            word_list_path = Path(config.data.word_list_path)
+            if not word_list_path.is_absolute():
+                # Make relative to project root
+                from pathlib import Path as P
+                project_root = P(__file__).parent.parent.parent
+                word_list_path = project_root / word_list_path
+            self.word_list_path = str(word_list_path)
+
         # Initialize optimizer
         if optimizer is None:
             self.optimizer = torch.optim.AdamW(
@@ -170,6 +181,9 @@ class WordleGRPOTrainer:
         )
         # all_completions: List[List[str]], shape (batch_size, num_generations)
 
+        # IMPORTANT: Set model back to train mode after generation
+        self.model.train()
+
         # Step 2: Compute rewards for all completions
         logger.debug(f"Step {self.global_step}: Computing rewards")
         rewards = self._compute_rewards(prompts, all_completions, batch)
@@ -189,14 +203,42 @@ class WordleGRPOTrainer:
         loss = self.compute_grpo_loss(logprobs, advantages)
 
         # Step 6: Backpropagation with gradient accumulation
-        loss = loss / self.gradient_accumulation_steps
-        loss.backward()
+        # Skip if loss is invalid or all rewards are zero (no learning signal)
+        if torch.isnan(loss) or torch.isinf(loss) or rewards.sum().abs() < 1e-6:
+            logger.warning(f"Skipping backward pass: loss={loss.item():.6f}, sum_rewards={rewards.sum().item():.6f}")
+            # Still count the step but don't update
+            loss = torch.tensor(0.0, device=self.device)
+        else:
+            loss = loss / self.gradient_accumulation_steps
+            loss.backward()
 
-        # Update weights if accumulated enough gradients
-        if (self.global_step + 1) % self.gradient_accumulation_steps == 0:
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
-            self.optimizer.step()
-            self.optimizer.zero_grad()
+            # Update weights if accumulated enough gradients
+            if (self.global_step + 1) % self.gradient_accumulation_steps == 0:
+                # Check for NaN gradients before update
+                has_nan_grad = False
+                for param in self.model.parameters():
+                    if param.grad is not None and torch.isnan(param.grad).any():
+                        has_nan_grad = True
+                        break
+
+                if has_nan_grad:
+                    logger.warning("NaN detected in gradients, skipping optimizer step")
+                    self.optimizer.zero_grad()
+                else:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                    self.optimizer.step()
+                    self.optimizer.zero_grad()
+
+                    # Check for NaN in model parameters after update
+                    has_nan_param = False
+                    for param in self.model.parameters():
+                        if torch.isnan(param).any():
+                            has_nan_param = True
+                            break
+
+                    if has_nan_param:
+                        logger.error("NaN detected in model parameters after update! Training unstable.")
+                        # This is a critical error - model is corrupted
 
         # Collect metrics
         metrics = {
@@ -234,15 +276,19 @@ class WordleGRPOTrainer:
         for i, prompt in enumerate(prompts):
             for j, completion in enumerate(completions[i]):
                 # Create example dict for reward function
-                # TODO: Extract proper example data from batch
                 example = {
                     "past_guess_history": batch.get("past_guess_histories", [[]])[i],
-                    "word_list": batch.get("word_list", []),
+                    "word_list": self.word_list_path,  # Path to CSV file
                 }
 
                 # Compute reward
                 reward = self.reward_function(prompt, completion, example)
                 rewards[i, j] = reward
+
+                # Debug: Log first completion of first batch
+                if self.global_step == 0 and i == 0 and j == 0:
+                    logger.warning(f"Sample completion:\n{completion[:200]}")
+                    logger.warning(f"Reward: {reward:.4f}")
 
         return rewards.to(self.device)
 
@@ -259,18 +305,20 @@ class WordleGRPOTrainer:
         Returns:
             Tensor of advantages, shape (batch_size, num_generations).
         """
-        # TODO: Implement proper GRPO advantage computation
-        # For now, use simple baseline subtraction (mean reward per prompt)
-
         # Compute baseline (mean reward for each prompt)
         baseline = rewards.mean(dim=1, keepdim=True)  # Shape: (batch_size, 1)
 
         # Advantages = rewards - baseline
         advantages = rewards - baseline  # Shape: (batch_size, num_generations)
 
-        # Optional: Normalize advantages within each group
-        # TODO: Add group-wise normalization if needed
-        # advantages = (advantages - advantages.mean(dim=1, keepdim=True)) / (advantages.std(dim=1, keepdim=True) + 1e-8)
+        # Normalize advantages within each group for stability
+        std = advantages.std(dim=1, keepdim=True)
+        # Only normalize if std is not too small (avoid division by near-zero)
+        if (std > 1e-6).any():
+            advantages = advantages / (std + 1e-8)
+
+        # Clamp advantages to prevent extreme values
+        advantages = torch.clamp(advantages, min=-10.0, max=10.0)
 
         return advantages
 
@@ -292,12 +340,13 @@ class WordleGRPOTrainer:
             Tensor of log probabilities, shape (batch_size, num_generations).
         """
         batch_size = len(prompts)
-        logprobs = torch.zeros(batch_size, self.num_generations)
+        logprobs_list = []  # Collect tensors to preserve gradients
 
         # TODO: Implement efficient batched log probability computation
         # For now, compute one at a time
 
         for i, prompt in enumerate(prompts):
+            prompt_logprobs = []
             for j, completion in enumerate(completions[i]):
                 # Combine prompt and completion
                 full_text = prompt + completion
@@ -319,10 +368,9 @@ class WordleGRPOTrainer:
 
                 prompt_length = prompt_inputs.input_ids.shape[1]
 
-                # Get model outputs
-                with torch.no_grad():
-                    outputs = self.model(**inputs)
-                    logits = outputs.logits
+                # Get model outputs (KEEP GRADIENTS!)
+                outputs = self.model(**inputs)
+                logits = outputs.logits
 
                 # Compute log probabilities for completion tokens only
                 # TODO: Optimize this - currently inefficient
@@ -331,15 +379,25 @@ class WordleGRPOTrainer:
                     token_id = inputs.input_ids[0, k + 1]
                     token_logits = logits[0, k, :]
                     token_logprob = F.log_softmax(token_logits, dim=-1)[token_id]
-                    completion_logprobs.append(token_logprob.item())
+                    completion_logprobs.append(token_logprob)  # Keep as tensor!
 
-                # Sum log probabilities
+                # Sum log probabilities (keep as tensor to preserve gradients)
                 if completion_logprobs:
-                    logprobs[i, j] = sum(completion_logprobs)
+                    total_logprob = torch.stack(completion_logprobs).sum()
                 else:
-                    logprobs[i, j] = 0.0
+                    total_logprob = torch.tensor(0.0, device=self.device, requires_grad=True)
 
-        return logprobs.to(self.device)
+                prompt_logprobs.append(total_logprob)
+
+            logprobs_list.append(torch.stack(prompt_logprobs))
+
+        # Stack all logprobs into tensor (batch_size, num_generations)
+        logprobs = torch.stack(logprobs_list)
+
+        # Clamp logprobs to prevent extreme values that cause NaN
+        logprobs = torch.clamp(logprobs, min=-100.0, max=0.0)
+
+        return logprobs
 
     def compute_grpo_loss(
         self,

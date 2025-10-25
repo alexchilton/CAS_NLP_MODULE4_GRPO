@@ -69,7 +69,16 @@ def output_format_check(
         # Search for the regex in the completion
         match = re.search(regex, completion, re.DOTALL)
         if match is None or len(match.groups()) != 2:
-            logger.debug("Output format check failed: Invalid format")
+            logger.debug("Output format check failed: Invalid format, trying fallback...")
+            # REWARD SHAPING: Look for ANY 5-letter word as fallback
+            word_list = _load_word_list(example, word_list_path)
+            if word_list is not None:
+                # Find all uppercase 5-letter words in the completion
+                five_letter_words = re.findall(r'\b[A-Z]{5}\b', completion.upper())
+                for word in five_letter_words:
+                    if word in word_list:
+                        logger.debug(f"Output format check: Found valid word '{word}' without proper format, giving partial credit")
+                        return 0.3  # Partial credit for valid word without format
             return 0.0
 
         guess = match.groups()[1].strip()
@@ -95,6 +104,17 @@ def output_format_check(
 
     except Exception as e:
         logger.error(f"Error in output_format_check: {e}", exc_info=True)
+        # REWARD SHAPING: Even on error, try to find any valid word
+        try:
+            word_list = _load_word_list(example, word_list_path)
+            if word_list is not None:
+                five_letter_words = re.findall(r'\b[A-Z]{5}\b', completion.upper())
+                for word in five_letter_words:
+                    if word in word_list:
+                        logger.debug(f"Output format check: Found valid word '{word}' on error fallback")
+                        return 0.2  # Small credit even with errors
+        except:
+            pass
         return 0.0
 
     return reward
