@@ -1,0 +1,26 @@
+# Core dependencies for Wordle GRPO training
+# These packages are required for both development and production environments
+
+# Transformer models and utilities
+transformers>=4.40.0
+datasets>=2.18.0
+
+# Deep learning framework
+torch>=2.2.0
+
+# Parameter-efficient fine-tuning
+peft>=0.10.0
+
+# Distributed training and optimization
+accelerate>=0.28.0
+
+# Configuration and data handling
+pyyaml
+pandas
+numpy
+
+# Progress tracking
+tqdm
+
+# Environment management
+python-dotenv

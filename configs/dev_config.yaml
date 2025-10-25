@@ -1,0 +1,27 @@
+
+
+
+# Development Configuration for Wordle GRPO Training (Mac testing)
+
+training:
+  batch_size: 1
+  num_generations: 2
+  max_samples: 10
+  gradient_accumulation_steps: 4
+  epochs: 1
+  learning_rate: 5e-5
+
+model:
+  name: "gpt2"  # Small model for testing
+  use_quantization: false
+  lora_rank: 8
+  lora_alpha: 16
+  target_modules: ["c_attn"]
+
+data:
+  dataset_name: "predibase/wordle-grpo"
+  train_split: "train[:10]"
+
+output:
+  checkpoint_dir: "./checkpoints_dev"
+  log_dir: "./logs_dev"
