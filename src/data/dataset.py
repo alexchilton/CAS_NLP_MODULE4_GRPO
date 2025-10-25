@@ -14,6 +14,8 @@ import torch
 from datasets import load_dataset
 from torch.utils.data import DataLoader, Dataset
 
+from data.prompt_templates import add_few_shot_examples
+
 logger = logging.getLogger(__name__)
 
 
@@ -31,6 +33,8 @@ class WordleDataset(Dataset):
         split: str = "train",
         word_list_path: Optional[Union[str, Path]] = None,
         max_samples: int = -1,
+        use_few_shot: bool = True,
+        num_examples: int = 2,
     ):
         """
         Initialize the Wordle dataset.
@@ -40,7 +44,11 @@ class WordleDataset(Dataset):
             split: Dataset split to load (e.g., "train", "train[:100]").
             word_list_path: Optional path to word_list.csv file. If None, will try to load from dataset.
             max_samples: Maximum number of samples to load. -1 means load all.
+            use_few_shot: Whether to add few-shot examples to prompts.
+            num_examples: Number of few-shot examples to add (if use_few_shot=True).
         """
+        self.use_few_shot = use_few_shot
+        self.num_examples = num_examples
         logger.info(f"Loading dataset: {dataset_name}, split: {split}")
 
         # Load dataset from HuggingFace
@@ -136,9 +144,16 @@ class WordleDataset(Dataset):
         """
         sample = self.dataset[idx]
 
+        # Get the original prompt
+        prompt = sample.get("prompt", "")
+
+        # Add few-shot examples if enabled
+        if self.use_few_shot:
+            prompt = add_few_shot_examples(prompt, num_examples=self.num_examples)
+
         # Create a standardized format
         item = {
-            "prompt": sample.get("prompt", ""),
+            "prompt": prompt,
             "past_guess_history": sample.get("past_guess_history", []),
             "word_list": self.word_list if self.word_list else sample.get("word_list", []),
             "idx": idx,
@@ -209,6 +224,8 @@ def get_dataloader(
     num_workers: int = 0,
     word_list_path: Optional[Union[str, Path]] = None,
     max_samples: int = -1,
+    use_few_shot: bool = True,
+    num_examples: int = 2,
 ) -> DataLoader:
     """
     Create a DataLoader for the Wordle dataset.
@@ -221,6 +238,8 @@ def get_dataloader(
         num_workers: Number of worker processes for data loading.
         word_list_path: Optional path to word_list.csv file.
         max_samples: Maximum number of samples to load. -1 means load all.
+        use_few_shot: Whether to add few-shot examples to prompts.
+        num_examples: Number of few-shot examples to add.
 
     Returns:
         PyTorch DataLoader instance.
@@ -230,6 +249,8 @@ def get_dataloader(
         split=split,
         word_list_path=word_list_path,
         max_samples=max_samples,
+        use_few_shot=use_few_shot,
+        num_examples=num_examples,
     )
 
     dataloader = DataLoader(
