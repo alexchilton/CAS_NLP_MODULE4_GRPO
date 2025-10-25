@@ -35,7 +35,9 @@ wordle-grpo/
 │   ├── train.py           # Main training script
 │   ├── evaluate.py        # Evaluation script
 │   ├── download_data.py   # Dataset download script
-│   └── test_setup.py      # Setup verification
+│   ├── view_data.py       # Data viewing utility
+│   ├── test_install.py    # Quick installation test
+│   └── test_setup.py      # Comprehensive setup verification
 ├── tests/                 # Unit tests
 │   ├── test_wordle_game.py
 │   └── test_rewards.py
@@ -56,10 +58,13 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements-dev.txt
 
+# Quick installation test
+python scripts/test_install.py
+
 # Download datasets
 python scripts/download_data.py
 
-# Verify setup
+# Comprehensive setup verification
 python scripts/test_setup.py
 ```
 
@@ -73,10 +78,13 @@ source venv/bin/activate
 # Install dependencies
 pip install -r requirements-prod.txt
 
+# Quick installation test
+python scripts/test_install.py
+
 # Download datasets
 python scripts/download_data.py
 
-# Verify setup
+# Comprehensive setup verification
 python scripts/test_setup.py
 ```
 
