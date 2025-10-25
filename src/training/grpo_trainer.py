@@ -62,10 +62,10 @@ class WordleGRPOTrainer:
         self.save_dir = Path(save_dir) if save_dir else Path(config.output.checkpoint_dir)
         self.save_dir.mkdir(parents=True, exist_ok=True)
 
-        # Training parameters
-        self.num_generations = config.training.num_generations
-        self.learning_rate = config.training.learning_rate
-        self.gradient_accumulation_steps = config.training.gradient_accumulation_steps
+        # Training parameters (ensure numeric types)
+        self.num_generations = int(config.training.num_generations)
+        self.learning_rate = float(config.training.learning_rate)
+        self.gradient_accumulation_steps = int(config.training.gradient_accumulation_steps)
 
         # Initialize optimizer
         if optimizer is None:
