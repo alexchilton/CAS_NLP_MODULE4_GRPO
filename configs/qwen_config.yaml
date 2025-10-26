@@ -1,0 +1,25 @@
+# Qwen2.5 Configuration for Wordle GRPO Training
+# Qwen2.5-1.5B-Instruct - Alibaba's efficient instruction-tuned model
+
+training:
+  batch_size: 1
+  num_generations: 2
+  max_samples: 100
+  gradient_accumulation_steps: 4
+  epochs: 3
+  learning_rate: 5e-6  # Conservative LR for instruct model
+
+model:
+  name: "Qwen/Qwen2.5-1.5B-Instruct"
+  use_quantization: false
+  lora_rank: 8
+  lora_alpha: 16
+
+data:
+  dataset_name: "predibase/wordle-grpo"
+  train_split: "train[:100]"
+  word_list_path: "data/wordle_word_list.csv"
+
+output:
+  checkpoint_dir: "./checkpoints_qwen"
+  log_dir: "./logs_qwen"

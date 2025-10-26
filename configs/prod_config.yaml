@@ -18,6 +18,7 @@ model:
 data:
   dataset_name: "predibase/wordle-grpo"
   train_split: "train"
+  word_list_path: "data/wordle_word_list.csv"
 
 output:
   checkpoint_dir: "./checkpoints"
