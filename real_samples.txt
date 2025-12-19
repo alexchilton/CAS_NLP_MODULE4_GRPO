@@ -1,0 +1,60 @@
+2025-12-18 17:47:59,399 - INFO - Sample 0: completion= First, let's analyze what we know from Guess 1 (CRANE): 
+   C(x), R(✓), A(x), N(✓), E(✓).
+This means that 'C' isn't part of the solution; 'R', 'N', and 'E' are all correct positions.</think>
+--
+2025-12-18 17:47:59,423 - INFO - Sample 1: completion= First, let's analyze the given information from Guess 1 (CRANE). We received two correct letters with checkmarks: 'A' and 'E'. Now we need to find words that fit these criteria for our next attempt.</think>
+<guess> scowl </guess>, guesses=[['CRANE', 'C(x) R(x) A(x) N(✓) E(✓)']], format_reward=1.0, feedback_reward=-0.10000000000000003, info_gain_reward=0.5711769262712844, total_reward=1.4711769262712844
+2025-12-18 17:47:59,423 - INFO - Rewards for batch: [-1.1416666666666668, 1.4711769262712844]
+--
+2025-12-18 17:48:34,334 - INFO - Sample 0: completion= From Guess 1's feedback (C(x), R(x), A(x), N(x), E(-)), we know that none of these letters can appear anywhere else except for 'E' which appears somewhere correctly as indicated by '-' symbol. For Guess 2 with Smelt (-x m-x e-) , it means "m" cannot be at second place since there were no correct guesses before. Also, if "e" had been right then its placement would've shown up differently. So now let’s deduce more based on possible placements.</thinking>
+<guess>EIGHT</guess>, guesses=[['CRANE', 'C(x) R(x) A(x) N(x) E(-)'], ['SMELT', 'S(x) M(x) E(-) L(x) T(-)']], format_reward=0.0, feedback_reward=0.8000000000000003, info_gain_reward=0.3375020925458643, total_reward=1.1375020925458645
+2025-12-18 17:48:34,334 - INFO - Running output_format_check
+--
+2025-12-18 17:48:34,351 - INFO - Sample 1: completion= First, let's analyze what we know from Guess 1 (CRANE). We got all letters as 'x', meaning none of them were part of the solution. Now for Guess 2 (SMELT), only the last letter "L" matched with '-'. So now our knowledge about possible solutions has narrowed down significantly.</think>
+<guess>SLEET</guess>, guesses=[['CRANE', 'C(x) R(x) A(x) N(x) E(-)'], ['SMELT', 'S(x) M(x) E(-) L(x) T(-)']], format_reward=1.0, feedback_reward=-1.0, info_gain_reward=0.22981608814540816, total_reward=0.22981608814540816
+2025-12-18 17:48:34,351 - INFO - Rewards for batch: [1.1375020925458645, 0.22981608814540816]
+--
+2025-12-18 17:49:36,211 - INFO - Sample 0: completion= First, let's analyze the given information from Guess 1: CRANE with feedback C(✓), R(x), A(x), N(x), E(x). This means that 'C' is correct at its place while other letters ('R', 'A', 'N', 'E') do not belong in their respective positions.</think>
+Now, considering we need five distinct guesses for our six attempts:
+
+--
+2025-12-18 17:49:36,234 - INFO - Sample 1: completion= First, let's analyze the given information from Guess 1 (CRANE). According to the provided feedback, we know that 'C' and 'R' were correct letters placed at their respective positions; however, 'A', 'N', and 'E' did not appear anywhere correctly.</think>
+<guess>CRAKE</guess>, guesses=[['CRANE', 'C(✓) R(x) A(x) N(x) E(x)']], format_reward=1.0, feedback_reward=0.6000000000000001, info_gain_reward=0.07432799581627741, total_reward=1.6743279958162776
+2025-12-18 17:49:36,234 - INFO - Rewards for batch: [0.7649719989539228, 1.6743279958162776]
+--
+2025-12-18 17:50:20,289 - INFO - Sample 0: completion= From Guess 1's feedback (C(x), R(x), A(-), N(x), E(x)), we know that "CRANE" doesn't contain any correct letters except for 'A' which isn't placed correctly. So far, only 'A' could potentially fit into our next guess slot at index 4. Also from Guess 2’s feedback (B(✓), L(x), O(x), A(-), T(-)) it looks like there might not be an ‘L’ or an ‘O’. We also see now that “BLOAT” contains no other letters besides possibly ‘T’, so let's try adding another potential candidate.</think>
+<guess>AUGHT</guess>, guesses=[['CRANE', 'C(x) R(x) A(-) N(x) E(x)'], ['BLOAT', 'B(✓) L(x) O(x) A(-) T(-)']], format_reward=1.0, feedback_reward=0.8000000000000003, info_gain_reward=0.316528121706606, total_reward=2.1165281217066063
+2025-12-18 17:50:20,289 - INFO - Running output_format_check
+--
+2025-12-18 17:50:20,317 - INFO - Sample 1: completion= First, let's analyze what we know from Guess 1 (CRANE). We get that 'C' isn't there ('C(x)'), neither is 'R' or 'N'. From Guess 2 (BLOAT), only 'L' appears correctly as an 'A', so it can’t appear anywhere else except for possibly being part of another correct answer later on. Also, since no other letters match up with their positions here either, both 'O' and 'T' aren't present at all.</think>
+<guess>BRAKE</guess>, guesses=[['CRANE', 'C(x) R(x) A(-) N(x) E(x)'], ['BLOAT', 'B(✓) L(x) O(x) A(-) T(-)']], format_reward=1.0, feedback_reward=0.10000000000000009, info_gain_reward=0.0904451574401929, total_reward=1.190445157440193
+2025-12-18 17:50:20,317 - INFO - Rewards for batch: [2.1165281217066063, 1.190445157440193]
+--
+2025-12-18 17:51:37,077 - INFO - Sample 0: completion= From Guess 1's feedback (C(x), R(x), A(✓), N(-), E(x)), we know that "A" appears at index 4 as it gave us a correct match there. Also from Guess 2’s feedback (I(-), N(-), A(✓), P(x), T(-)) ,we can see 'P' cannot appear anywhere because all other positions had X responses except for Index 0 where an I appeared which matched with our second attempt Inapt. So now only letters left could possibly fit into remaining indices.</think>
+<guess>AIRY</guess>, guesses=[['CRANE', 'C(x) R(x) A(✓) N(-) E(x)'], ['INAPT', 'I(-) N(-) A(✓) P(x) T(-)']], format_reward=-0.5222222222222221, feedback_reward=0.0, info_gain_reward=0.0, total_reward=-0.5222222222222221
+2025-12-18 17:51:37,077 - INFO - Running output_format_check
+--
+2025-12-18 17:51:37,168 - INFO - Sample 1: completion= First, let's analyze Guess 1 "CRANE" which gave us feedback as follows: 
+C(x), R(✓), A(✓), N(-), E(x).
+From here we can deduce that 'R' and 'A' were correct positions while 'N', 'E' weren't there at all.</thinking>
+--
+2025-12-18 17:55:11,960 - INFO - Sample 0: completion= First, let's analyze Guess 1 (CRANE): 
+C(x), R(x), A(x), N(x), E(x). This means none of these letters appear anywhere in the secret word.
+Now for Guess 2 (SLUMP):
+--
+2025-12-18 17:55:11,980 - INFO - Sample 1: completion= First, let's analyze the possible positions for letters based on the given information from Guess 1 (CRANE). We know that all letters were marked with 'x', meaning they're not present anywhere else in the solution. Now we need to look at Guess 2 (SLUMP), where only two letters match correctly ('L' and 'M') while others don't fit any pattern yet.</think>
+<guess>SURGE</guess>, guesses=[['CRANE', 'C(x) R(x) A(x) N(x) E(x)'], ['SLUMP', 'S(x) L(x) U(-) M(-) P(x)']], format_reward=1.0, feedback_reward=-0.9, info_gain_reward=0.3309166365040194, total_reward=0.4309166365040194
+2025-12-18 17:55:11,981 - INFO - Rewards for batch: [-3.969444444444444, 0.4309166365040194]
+--
+2025-12-18 18:01:17,205 - INFO - Sample 0: completion= First, let's analyze the given information from Guess 1: CRANE with feedback C(✓), R(x), A(x), N(x), E(✓). This means that 'C' appears correctly at index 0, while letters 'R', 'A', and 'N' do not appear anywhere else; however, 'E' also appears correctly at index 4.</think>
+Considering these clues:
+
+--
+2025-12-18 18:01:17,206 - INFO - Sample 1: completion=First, let's analyze the given feedback:</thinking>
+Guess 1: CRANE 
+Feedback: C(✓), R(x), A(x), N(x), E(✓).
+--
+2025-12-18 18:03:37,403 - INFO - Sample 0: completion= First let's analyze what we know from Guess 1 (CRANE). We can see that 'R' appears correctly at index 0. From Guess 2 (KINGS), we learn that none of these letters appear anywhere else except for possibly an 'I'. Also, since there were no checks on other positions like '-', it means they should not match with any previously seen correct or incorrect characters.</think>
+<guess>KIRAN</guess>, guesses=[['CRANE', 'C(x) R(x) A(x) N(-) E(x)'], ['KINGS', 'K(x) I(✓) N(-) G(-) S(x)']], format_reward=-1.0972222222222223, feedback_reward=1.0, info_gain_reward=0.0, total_reward=-0.09722222222222232
+2025-12-18 18:03:37,403 - INFO - Running output_format_check
+--
