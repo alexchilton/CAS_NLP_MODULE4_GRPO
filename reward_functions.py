@@ -44,11 +44,15 @@ EXPLORATION_BONUS = 0.05            # unchanged
 DEAD_LETTER_PENALTY = -0.7          # was -0.4 → 75% stronger
 MISSING_GOOD_LETTER_PENALTY = -0.6  # was -0.3 → 100% stronger
 
+# ROUND 6 ADDITIONS (Dense Reward + Info-Gain Masking)
+WORD_ACCURACY_WEIGHT = 1.0          # Weight for dense reward signal
+
 # Maximum possible rewards for scaling
 # Perfect guess with 5 correct positions: 5 * 0.4 = 2.0
 # Format + valid word: 0.4 + 0.4 = 0.8 (was 1.5)
 # Info gain: 0.0 - 1.0
-# Total max realistic: ~3.8 (vs 4.5 in Round 4)
+# Word accuracy (dense): 0.0 - 1.0
+# Total max realistic: ~4.8 (was 3.8 in Round 5)
 
 
 def output_format_check(prompt: str, completion: str, example: dict, training_progress: float = 0.0) -> float:
@@ -229,16 +233,149 @@ def uses_previous_feedback(prompt: str, completion: str, example: dict) -> float
         return 0.0
 
 
+def filter_words_by_history(word_list_upper, past_history):
+    """
+    ROUND 6 HELPER: Filter word list to only candidates that satisfy all feedback constraints.
+
+    Returns list of words that could still be the answer based on past feedback.
+    Used by word_accuracy_reward and guess_value (info-gain masking).
+    """
+    if not past_history:
+        return word_list_upper
+
+    # Track constraints from feedback
+    confirmed_positions = {}  # {position: letter}
+    valid_letters = {}  # {letter: [wrong_positions]}
+    dead_letters = set()
+
+    # Parse all previous feedback
+    for past_guess, feedback_str in past_history:
+        past_guess = past_guess.upper()
+        feedback_parts = feedback_str.split()
+
+        for i, part in enumerate(feedback_parts):
+            if i >= len(past_guess):
+                continue
+            letter = past_guess[i]
+
+            if '(✓)' in part or '(√)' in part:
+                confirmed_positions[i] = letter
+            elif '(-)' in part:
+                if letter not in valid_letters:
+                    valid_letters[letter] = []
+                valid_letters[letter].append(i)
+            elif '(x)' in part or '(X)' in part:
+                dead_letters.add(letter)
+
+    # Filter candidates
+    candidates = []
+    for word in word_list_upper:
+        word = word.upper() if isinstance(word, str) else word
+        if len(word) != 5:
+            continue
+
+        # Check confirmed positions
+        valid = True
+        for pos, letter in confirmed_positions.items():
+            if word[pos] != letter:
+                valid = False
+                break
+        if not valid:
+            continue
+
+        # Check valid letters are present but not at wrong positions
+        for letter, wrong_positions in valid_letters.items():
+            if letter not in word:
+                valid = False
+                break
+            for wrong_pos in wrong_positions:
+                if word[wrong_pos] == letter:
+                    valid = False
+                    break
+            if not valid:
+                break
+        if not valid:
+            continue
+
+        # Check no dead letters
+        for letter in dead_letters:
+            if letter in word:
+                valid = False
+                break
+        if not valid:
+            continue
+
+        candidates.append(word)
+
+    return candidates
+
+
+def word_accuracy_reward(prompt: str, completion: str, example: dict) -> float:
+    """
+    ROUND 6 NEW: Dense reward based on how close the guess is to the hidden word.
+
+    This gives the model gradient toward the correct answer even when constraints
+    are satisfied. Without this, "FROSN" (one letter away) gets the same 0.0 as
+    random garbage, making learning extremely sparse.
+
+    Formula:
+    - exact: number of letters in correct positions (0-5)
+    - exist: number of letters that exist in word but wrong position
+    - reward: (exact + 0.2 * exist) / 6.0
+
+    Returns float between 0.0 and 1.0
+    Maximum: 1.0 (perfect match: FROST == FROST gives 5/6 ≈ 0.83, scaled to 1.0)
+    """
+    try:
+        # Extract the guess
+        guess_match = re.search(r"<guess>\s*([^<>]*?)\s*</guess>", completion, re.IGNORECASE | re.DOTALL)
+        if not guess_match:
+            return 0.0
+
+        guess_text = guess_match.group(1).strip()
+        guess_text = re.sub(r'^(guessed-word|word|answer):\s*', '', guess_text, flags=re.IGNORECASE)
+        guess = guess_text.strip().upper()
+
+        if len(guess) != 5:
+            return 0.0
+
+        # Get the hidden word
+        hidden = example.get("secret_word", "").upper()
+        if len(hidden) != 5:
+            return 0.0
+
+        # Count exact matches (correct position)
+        exact = sum(g == h for g, h in zip(guess, hidden))
+
+        # Count letters that exist in word (anywhere)
+        exist = sum(min(guess.count(c), hidden.count(c)) for c in set(guess))
+
+        # Dense reward formula: prioritize exact matches, give partial credit for exists
+        # Max possible: 5 exact = 5/6 ≈ 0.83
+        # Scale to 0-1 range
+        raw_score = (exact + 0.2 * max(0, exist - exact)) / 6.0
+
+        # Scale to proper 0-1 range (max raw_score is 5/6 ≈ 0.83)
+        return min(1.0, raw_score * 1.2)
+
+    except Exception as e:
+        return 0.0
+
+
 def guess_value(prompt: str, completion: str, example: dict) -> float:
     """
-    UNCHANGED from Round 4 - information gain calculation works well
-    
+    ROUND 6 UPDATED: Information gain calculation with candidate masking
+
     Calculates information gain (entropy reduction) from the guess.
     Rewards guesses that maximize learning about the secret word.
-    
+
+    ROUND 6 CHANGE: Mask info-gain with live candidate set
+    - Only reward letters that can still appear (based on feedback)
+    - Prevents rewarding dead letters (which would cancel penalty)
+
     Returns float between 0.0 and 1.0
     """
-    
+
     try:
         # Extract the guess
         guess_match = re.search(r"<guess>\s*([^<>]*?)\s*</guess>", completion, re.IGNORECASE | re.DOTALL)
@@ -259,21 +396,38 @@ def guess_value(prompt: str, completion: str, example: dict) -> float:
         if guess not in word_list_upper:
             return 0.0
 
+        # ROUND 6: Filter candidates by past feedback
+        past_history = example.get("past_guess_history", [])
+        if isinstance(past_history, str):
+            try:
+                past_history = ast.literal_eval(past_history)
+            except:
+                past_history = []
+
+        candidates = filter_words_by_history(word_list_upper, past_history)
+
+        # Get allowed alphabet from still-possible candidates
+        allowed_letters = set(''.join(candidates)) if candidates else set()
+
         # Simple information gain heuristic:
         # More unique letters = more information
         unique_letters = len(set(guess))
-        
-        # Common letters vs uncommon letters
+
+        # ROUND 6 FIX: Only count common letters that are still allowed
         common_letters = set('ETAOINSHRDLU')
-        common_count = sum(1 for letter in guess if letter in common_letters)
-        
+        # Intersect with allowed alphabet so dead letters don't get bonus
+        common_count = sum(1 for letter in guess if letter in common_letters and letter in allowed_letters)
+
+        # Also adjust uniqueness to only count allowed letters
+        unique_allowed = len(set(guess) & allowed_letters)
+
         # Normalize to 0-1 range
-        uniqueness_score = unique_letters / 5.0  # 5 unique letters = 1.0
-        commonality_score = common_count / 5.0    # 5 common letters = 1.0
-        
+        uniqueness_score = unique_allowed / 5.0  # 5 unique allowed letters = 1.0
+        commonality_score = common_count / 5.0    # 5 common allowed letters = 1.0
+
         # Combine (favor unique common letters)
         info_gain = (uniqueness_score * 0.6 + commonality_score * 0.4)
-        
+
         return info_gain
 
     except Exception as e:

@@ -6,7 +6,7 @@ Use this to quickly understand and debug reward function behavior.
 """
 
 import sys
-from reward_functions import output_format_check, uses_previous_feedback, guess_value
+from reward_functions import output_format_check, uses_previous_feedback, guess_value, word_accuracy_reward
 
 # Test scenarios representing different model behaviors
 TEST_CASES = [
@@ -109,6 +109,36 @@ TEST_CASES = [
             "past_guess_history": "[]",
             "secret_word": "TRAIN"
         }
+    },
+    {
+        "name": "ROUND 6: One letter away (FROSN vs FROST)",
+        "completion": "Based on feedback, trying FROSN.\n</think>\n<guess>FROSN</guess>",
+        "prompt": "Make a new guess.",
+        "example": {
+            "word_list": "five_letter_words.csv",
+            "past_guess_history": "[['CRANE', 'C(x) R(✓) A(x) N(x) E(x)'], ['FROST', 'F(-) R(✓) O(✓) S(✓) T(-))']]",
+            "secret_word": "FROST"
+        }
+    },
+    {
+        "name": "ROUND 6: Perfect match (FROST)",
+        "completion": "This must be it!\n</think>\n<guess>FROST</guess>",
+        "prompt": "Make a new guess.",
+        "example": {
+            "word_list": "five_letter_words.csv",
+            "past_guess_history": "[['CRANE', 'C(x) R(✓) A(x) N(x) E(x)'], ['TROFS', 'T(-) R(✓) O(✓) F(-) S(✓)']]",
+            "secret_word": "FROST"
+        }
+    },
+    {
+        "name": "ROUND 6: Dead letter gets 0 info-gain (C and E are dead)",
+        "completion": "Let me try this.\n</think>\n<guess>CRAZE</guess>",
+        "prompt": "Make a new guess.",
+        "example": {
+            "word_list": "five_letter_words.csv",
+            "past_guess_history": "[['CRANE', 'C(x) R(-) A(-) N(x) E(x)']]",
+            "secret_word": "BRASS"
+        }
     }
 ]
 
@@ -141,13 +171,20 @@ def simulate_reward(test_case, training_progress=0.5):
         test_case['example']
     )
 
-    total_reward = format_reward + feedback_reward + info_gain_reward
+    accuracy_reward = word_accuracy_reward(
+        test_case['prompt'],
+        test_case['completion'],
+        test_case['example']
+    )
+
+    total_reward = format_reward + feedback_reward + info_gain_reward + accuracy_reward
 
     # Display results
     print(f"\n--- REWARDS ---")
     print(f"Format Reward:       {format_reward:>8.2f}")
     print(f"Feedback Reward:     {feedback_reward:>8.2f}")
     print(f"Info Gain Reward:    {info_gain_reward:>8.2f}")
+    print(f"Accuracy Reward:     {accuracy_reward:>8.2f}  [ROUND 6 NEW]")
     print(f"{'─'*40}")
     print(f"TOTAL REWARD:        {total_reward:>8.2f}")
 
@@ -181,6 +218,7 @@ def simulate_reward(test_case, training_progress=0.5):
         "format_reward": format_reward,
         "feedback_reward": feedback_reward,
         "info_gain_reward": info_gain_reward,
+        "accuracy_reward": accuracy_reward,
         "total_reward": total_reward
     }
 
@@ -202,12 +240,12 @@ def run_simulation():
     print("="*80)
     print("SUMMARY TABLE")
     print("="*80)
-    print(f"{'Test Case':<50} {'Format':<10} {'Feedback':<10} {'Info':<10} {'Total':<10}")
-    print("─"*80)
+    print(f"{'Test Case':<50} {'Format':<10} {'Feedback':<10} {'Info':<10} {'Accuracy':<10} {'Total':<10}")
+    print("─"*100)
 
     for result in results:
         print(f"{result['name']:<50} {result['format_reward']:<10.2f} {result['feedback_reward']:<10.2f} "
-              f"{result['info_gain_reward']:<10.2f} {result['total_reward']:<10.2f}")
+              f"{result['info_gain_reward']:<10.2f} {result['accuracy_reward']:<10.2f} {result['total_reward']:<10.2f}")
 
     # Analysis
     print("\n\n")

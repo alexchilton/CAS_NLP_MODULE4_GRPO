@@ -16,7 +16,8 @@ from logger_setup import logger
 from sklearn.model_selection import train_test_split
 
 # FIX: Import patched reward functions (with training_progress parameter)
-from reward_functions import output_format_check, uses_previous_feedback, guess_value
+# ROUND 6: Added word_accuracy_reward for dense reward signal
+from reward_functions import output_format_check, uses_previous_feedback, guess_value, word_accuracy_reward
 
 from dotenv import load_dotenv
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, TrainerCallback
@@ -187,9 +188,11 @@ def wordle_reward_func(completions, prompts=None, secret_word=None, past_guess_h
         format_reward = output_format_check(base_prompt, final_completion, example, training_progress=_training_progress)
         feedback_reward = uses_previous_feedback(base_prompt, final_completion, example)
         info_gain_reward = guess_value(base_prompt, final_completion, example)
-        episode_reward = format_reward + feedback_reward + info_gain_reward
+        # ROUND 6: Add dense reward signal (word accuracy)
+        accuracy_reward = word_accuracy_reward(base_prompt, final_completion, example)
+        episode_reward = format_reward + feedback_reward + info_gain_reward + accuracy_reward
         logger.info(f"Sample {i}: completion={final_completion}, guesses={guess_history}, "
-                    f"format_reward={format_reward}, feedback_reward={feedback_reward}, info_gain_reward={info_gain_reward}, total_reward={episode_reward}")
+                    f"format_reward={format_reward}, feedback_reward={feedback_reward}, info_gain_reward={info_gain_reward}, accuracy_reward={accuracy_reward}, total_reward={episode_reward}")
         rewards.append(episode_reward)
     logger.info(f"Rewards for batch: {rewards}")
     return rewards
