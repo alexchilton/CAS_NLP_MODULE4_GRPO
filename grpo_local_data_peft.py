@@ -15,9 +15,8 @@ from typing import List
 from logger_setup import logger
 from sklearn.model_selection import train_test_split
 
-# FIX: Import patched reward functions (with training_progress parameter)
-# ROUND 6: Added word_accuracy_reward for dense reward signal
-from reward_functions import output_format_check, uses_previous_feedback, guess_value, word_accuracy_reward
+# STRICT: Import original reward functions (no word_accuracy, heavy format penalties)
+from reward_functions_strict import output_format_check, uses_previous_feedback, guess_value
 
 from dotenv import load_dotenv
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, TrainerCallback
@@ -27,7 +26,7 @@ import torch
 import datetime
 
 # PEFT imports
-from peft import get_peft_model, LoraConfig, TaskType
+from peft import get_peft_model, LoraConfig, TaskType, PeftModel
 
 # ----------------------#
 # 0. TEMPERATURE CALLBACK #
@@ -114,6 +113,21 @@ def load_and_prepare_data():
     logger.info(f"Secrets with length 5 and alphabetic only: {len(valid_rows)}")
     train_rows, val_rows = train_test_split(valid_rows, test_size=0.2, random_state=42)
     logger.info(f"Train set size: {len(train_rows)}, Validation set size: {len(val_rows)}")
+    
+    # Add explicit stop instruction to prompts to prevent hallucination
+    def add_stop_instruction(prompt):
+        # Insert instruction before the <|im_end|> tag in the system message
+        if '<|im_end|>' in prompt:
+            parts = prompt.split('<|im_end|>', 1)
+            stop_instruction = "\n\n**IMPORTANT**: Provide ONLY your <think></think> reasoning and <guess>WORD</guess>. Do NOT generate any text after the </guess> tag. Stop immediately after </guess>."
+            return parts[0] + stop_instruction + '<|im_end|>' + parts[1]
+        return prompt
+    
+    train_rows = train_rows.copy()
+    val_rows = val_rows.copy()
+    train_rows['prompt'] = train_rows['prompt'].apply(add_stop_instruction)
+    val_rows['prompt'] = val_rows['prompt'].apply(add_stop_instruction)
+    
     train_df = train_rows[['prompt', 'secret', 'past_guess_history']].rename(columns={'secret': 'secret_word'}).reset_index(drop=True)
     val_df = val_rows[['prompt', 'secret', 'past_guess_history']].rename(columns={'secret': 'secret_word'}).reset_index(drop=True)
     train_dataset = Dataset.from_pandas(train_df)
@@ -127,26 +141,28 @@ def load_and_prepare_data():
 
 def setup_model_and_tokenizer_peft():
     load_dotenv()
-    MODEL_NAME = "output_sft/wordle-sft-peft/final_model"  # Use SFT-trained model
+    BASE_MODEL_NAME = "google/gemma-3-4b-it"
+    ADAPTER_PATH = "output_sft/wordle-sft-peft/final_model"
     HF_TOKEN = None
 
-    logger.info(f"Loading tokenizer for {MODEL_NAME}...")
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, token=HF_TOKEN)
-    logger.info("Tokenizer loaded successfully!")
-
-    logger.info(f"Loading model {MODEL_NAME} (this may take a few minutes on Mac)...")
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
+    logger.info(f"Loading base model: {BASE_MODEL_NAME}...")
+    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME, token=HF_TOKEN)
+    
+    base_model = AutoModelForCausalLM.from_pretrained(
+        BASE_MODEL_NAME,
         token=HF_TOKEN,
         device_map="auto",
-        offload_folder="offload_tmp"
+        torch_dtype=torch.float32  # FP32 for MPS stability
     )
-    logger.info("Model loaded successfully!")
+    logger.info("Base model loaded!")
 
-    # Note: SFT model already has PEFT adapters, so we don't add them again
-    logger.info("SFT model already has PEFT adapters configured")
+    logger.info(f"Loading SFT LoRA adapters from: {ADAPTER_PATH}...")
+    from peft import PeftModel
+    model = PeftModel.from_pretrained(base_model, ADAPTER_PATH)
+    logger.info("SFT adapters loaded!")
     
     # Enable gradient computation for PEFT parameters
+    model.enable_input_require_grads()
     for name, param in model.named_parameters():
         if 'lora' in name.lower():
             param.requires_grad = True
@@ -155,7 +171,7 @@ def setup_model_and_tokenizer_peft():
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.pad_token_id = tokenizer.eos_token_id
     model.config.pad_token_id = tokenizer.pad_token_id
-    logger.info(f"Loaded model: {MODEL_NAME}")
+    logger.info(f"Loaded Gemma-3-4b with SFT adapters")
 
     # Print trainable parameters
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -184,15 +200,13 @@ def wordle_reward_func(completions, prompts=None, secret_word=None, past_guess_h
             'past_guess_history': guess_history,
             'secret_word': secret
         }
-        # FIX: Pass training_progress to output_format_check for staged penalties
+        # STRICT: Original reward structure (no word_accuracy, heavy penalties for hallucination)
         format_reward = output_format_check(base_prompt, final_completion, example, training_progress=_training_progress)
         feedback_reward = uses_previous_feedback(base_prompt, final_completion, example)
         info_gain_reward = guess_value(base_prompt, final_completion, example)
-        # ROUND 6: Add dense reward signal (word accuracy)
-        accuracy_reward = word_accuracy_reward(base_prompt, final_completion, example)
-        episode_reward = format_reward + feedback_reward + info_gain_reward + accuracy_reward
+        episode_reward = format_reward + feedback_reward + info_gain_reward
         logger.info(f"Sample {i}: completion={final_completion}, guesses={guess_history}, "
-                    f"format_reward={format_reward}, feedback_reward={feedback_reward}, info_gain_reward={info_gain_reward}, accuracy_reward={accuracy_reward}, total_reward={episode_reward}")
+                    f"format_reward={format_reward}, feedback_reward={feedback_reward}, info_gain_reward={info_gain_reward}, total_reward={episode_reward}")
         rewards.append(episode_reward)
     logger.info(f"Rewards for batch: {rewards}")
     return rewards
@@ -226,7 +240,9 @@ if __name__ == "__main__":
         per_device_eval_batch_size=2,  # Must be divisible by num_generations
         gradient_accumulation_steps=1,  # Adjusted for batch size
         num_generations=2,  # Minimum required for GRPO (needs at least 2 to compare)
-        learning_rate=5e-7,  # REDUCED: More conservative with balanced rewards
+        learning_rate=1e-3,  # INCREASED for SGD (typically 10-50x AdamW rate)
+        optim="sgd",  # Use SGD instead of AdamW to save memory
+        optim_args="momentum=0.9",  # Standard momentum for SGD
         logging_steps=1,  # Log every step to monitor progress
         eval_strategy="steps",
         eval_steps=20,  # Eval every 20 steps (faster feedback)
@@ -236,8 +252,8 @@ if __name__ == "__main__":
         bf16=False,
         fp16=False,  # Disable FP16 on MPS
         remove_unused_columns=False,
-        max_prompt_length=1024,  # Full prompt + history + CoT
-        max_completion_length=512,  # Enough for Wordle CoT + guess
+        max_prompt_length=512,  # REDUCED: Full prompt + history
+        max_completion_length=256,  # REDUCED: 512→256 for MPS memory (2x improvement)
         seed=42,
         gradient_checkpointing=False,
         load_best_model_at_end=True,
@@ -247,20 +263,23 @@ if __name__ == "__main__":
         report_to=["tensorboard", "wandb"],
         run_name=f"wordle-grpo-optimized-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}",
         # Temperature scheduling (handled by callback)
-        temperature=0.7,  # Start moderate, callback will reduce
+        temperature=0.3,  # Start lower to prevent hallucination (base model did well at 0.3)
         top_p=0.9,
         top_k=50,
-        repetition_penalty=1.1,  # Slightly reduced
+        repetition_penalty=1.2,  # Increased to discourage repeating chat template tokens
         # INCREASED: Stronger KL penalty to anchor to SFT behavior
         beta=0.1,  # DOUBLED: Stronger anchor prevents drift (was 0.05)
         generation_kwargs={
-            "temperature": 0.7,  # Will be updated by callback
+            "temperature": 0.3,  # Start lower (base model did well at 0.3)
             "top_p": 0.9,
             "top_k": 50,
-            "repetition_penalty": 1.1,
+            "repetition_penalty": 1.2,  # Increased to prevent chat token repetition
             "do_sample": True,
             "pad_token_id": tokenizer.pad_token_id,
             "min_p": 0.05,
+            "eos_token_id": tokenizer.eos_token_id,
+            # Note: stop_strings not supported by GRPOTrainer (tokenizer not passed to internal generate())
+            # Relying on max_completion_length=256 to constrain generation
         },
         scale_rewards="none",  # Keep rewards as-is (already balanced)
         max_grad_norm=0.5,  # REDUCED: More conservative clipping with balanced rewards
@@ -268,8 +287,9 @@ if __name__ == "__main__":
     logger.info("Training arguments configured.")
 
     # Initialize callbacks
-    # Temperature decay: 0.7 (moderate exploration) → 0.4 (focused) at 40% training
-    temp_callback = TemperatureSchedulerCallback(start_temp=0.7, end_temp=0.4, transition_ratio=0.4)
+    # Temperature decay: 0.3 (base model good performance) → 0.1 (very focused) throughout training
+    # Gradual decay over full training period to prevent hallucination
+    temp_callback = TemperatureSchedulerCallback(start_temp=0.3, end_temp=0.1, transition_ratio=1.0)
     progress_callback = TrainingProgressCallback()
 
     logger.info("Initializing GRPOTrainer (this may take a moment)...")
@@ -328,7 +348,7 @@ if __name__ == "__main__":
             "learning_rate": training_args.learning_rate,
             "batch_size": training_args.per_device_train_batch_size,
             "gradient_accumulation_steps": training_args.gradient_accumulation_steps,
-            "temperature_schedule": "0.7 → 0.4 at 40%",
+            "temperature_schedule": "0.3 → 0.1 gradually over full training",
             "max_completion_length": training_args.max_completion_length,
             "gradient_checkpointing": training_args.gradient_checkpointing,
         },
