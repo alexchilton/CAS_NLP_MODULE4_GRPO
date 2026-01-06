@@ -1,6 +1,12 @@
 # The Goldilocks Failure of RL Training
 ## How GRPO Failed Across Three Orders of Magnitude
 
+<!-- 
+SOURCE FILES:
+- Simple Prompt: transformer_grpo/wordle-grpo/src/data/prompt_templates.py
+- Structured Prompt: expert_guy/post_training_project/threestage/test_base_model_structured_prompts/prompt_system.py
+-->
+
 ---
 
 ## Slide 1: The XML Strategy (Why `<think>`?)
@@ -65,7 +71,60 @@ train_df = pd.DataFrame({
 
 ---
 
-## Slide 4: The Context Length Problem
+## Slide 4: Two Prompting Philosophies
+### "Different Approaches, Same Failures"
+
+We didn't just test different models—we tested **two distinct prompting strategies** to see if better instruction design could prevent failure.
+
+**Approach 1: Simple Prompt with Few-Shot Examples**
+*(Used for GPT-2 and early experiments)*
+
+```
+You are playing Wordle. Guess a 5-letter word.
+
+### IMPORTANT - Response Format:
+You MUST respond in this exact format:
+<think>your reasoning here</think>
+<guess>WORD</guess>
+
+### Example:
+<think>I'll try CRANE as a starting word with good coverage.</think>
+<guess>CRANE</guess>
+```
+
+**Key Features:** Direct instructions, minimal context, learning by example.
+
+---
+
+**Approach 2: Structured Prompt with State Tracking**
+*(Used for Qwen 2.5-3B and Gemma 3 4B)*
+
+```
+You are an expert Wordle-solving AI. Your primary directive is to 
+deduce the secret 5-letter English word with flawless logic and strategy.
+
+### Core Principles
+1. Deductive Reasoning: Analyze all available clues...
+2. Strategic Guessing: In early turns, maximize information...
+3. Self-Correction & Rule Adherence: Before finalizing a guess...
+
+You are playing a game of Wordle. Analyze the clues:
+**Current Knowledge:**
+*   **Correct Position (Green):** `A _ _ _ _`
+*   **Wrong Position (Yellow):** 'O', 'R', 'T', 'U'
+*   **Not in Word (Gray):** B, E, I, S
+*   **Words Already Guessed:** ARISE, ABOUT
+```
+
+**Key Features:** Explicit state representation, "expert" framing, detailed reasoning requirements.
+
+---
+
+**The Result:** Despite the more sophisticated prompt engineering in Approach 2, **all models still failed**. Better prompts couldn't overcome fundamental capacity limitations or reward hacking.
+
+---
+
+## Slide 5: The Context Length Problem
 ### "When the Answer is Out of Reach"
 
 **The Problem:**
@@ -84,7 +143,7 @@ The model learns to reason but not to *conclude*. It enters the "think loop" bec
 
 ---
 
-## Slide 5: The Temperature Catastrophe
+## Slide 6: The Temperature Catastrophe
 ### "Same Model, Different Universe"
 
 **The Discovery:**
@@ -108,7 +167,7 @@ This suggests the GRPO-trained policy was on a knife's edge—barely stable even
 
 ---
 
-## Slide 6: The Small Model (GPT-2)
+## Slide 7: The Small Model (GPT-2)
 ### "Too Small to Listen"
 
 **Hypothesis:**
@@ -125,7 +184,7 @@ The model was functionally "too weak" to even adhere to the syntax. Instead of p
 
 ---
 
-## Slide 7: Evidence - GPT-2 Hallucinations
+## Slide 8: Evidence - GPT-2 Hallucinations
 
 **Source:** `transformer_grpo/wordle-grpo/game_log.txt`
 
@@ -144,7 +203,7 @@ Feedback: Invalid guess: must be a 5-letter word.
 
 ---
 
-## Slide 8: The Medium Model (Qwen 2.5-3B)
+## Slide 9: The Medium Model (Qwen 2.5-3B)
 ### "The Reward Hacker"
 
 **Hypothesis:**
@@ -161,7 +220,7 @@ It found a local minimum in the reward landscape. The model was confused by the 
 
 ---
 
-## Slide 9: Evidence - The "THINK" Loop
+## Slide 10: Evidence - The "THINK" Loop
 
 **Source:** `transformer_grpo/wordle-grpo/evaluation_results/transcripts_20251026_070527.json`
 
@@ -180,8 +239,8 @@ The model abandons strategy and defaults to guessing the word "THINK" repeatedly
   ],
   "feedbacks": [
     "T(-) H(x) I(x) N(x) K(x)",  // Guess 1: THINK
-    "S(x) H(x) O(x) U(✓) T(✓)",
-    "E(x) N(x) L(-) I(x) T(✓)",
+    "S(x) H(x) O(x) U(Y) T(Y)",
+    "E(x) N(x) L(-) I(x) T(Y)",
     "F(x) I(x) E(x) R(x) E(x)",
     "I(x) D(x) I(x) O(x) M(x)",
     "P(x) A(-) C(-) E(x) D(x)"
@@ -194,7 +253,7 @@ The model abandons strategy and defaults to guessing the word "THINK" repeatedly
 
 ---
 
-## Slide 10: The Large Model (Gemma 3 4B)
+## Slide 11: The Large Model (Gemma 3 4B)
 ### "Model Collapse"
 
 **Hypothesis:**
@@ -211,7 +270,7 @@ We started with a strong baseline. The SFT model played Wordle competently (~10%
 
 ---
 
-## Slide 11: Evidence - The Infinite Loop
+## Slide 12: Evidence - The Infinite Loop
 
 **Source:** `expert_guy/post_training_project/outputs/case.log`
 
@@ -237,7 +296,7 @@ The model enters a degenerate state where it can only output the `<think>` token
 
 ---
 
-## Slide 12: Conclusion & The Failure Surface
+## Slide 13: Conclusion & The Failure Surface
 
 **Summary of Findings:**
 We successfully mapped the **"Failure Surface"** of GRPO training across three distinct regimes:
