@@ -1,0 +1,37 @@
+# Wordle GRPO Training Configuration
+
+model_name = "mlx_models/gemma-3-4b-it-4bit"
+output_dir = "mlx_output/grpo_from_base"
+run_name = "wordle-grpo-no-sft"
+
+# Training parameters
+learning_rate = 1e-6
+num_epochs = 10
+batch_size = 1
+gradient_accumulation_steps = 1
+max_train_samples = 76
+warmup_ratio = 0.05
+max_grad_norm = 1.0
+logging_steps = 10
+
+# GRPO sampling parameters
+num_generations = 4
+max_new_tokens = 512
+temperature = 0.3
+clip_eps = 0.2
+kl_coeff = 0.1
+
+# LoRA parameters
+lora_rank = 64
+lora_alpha = 16
+lora_layers = 16
+
+# Evaluation
+eval_steps = 50
+eval_samples = 10
+save_steps = 100
+log_jsonl = true
+
+# System
+seed = 42
+use_compile = false

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kill:*)",
+      "Bash(python test_base_qwen.py:*)",
+      "Bash(tee:*)",
+      "Read(//Users/alexchilton/Downloads/Current_Learning/uni/BERN/module4_transformer_grpo/expert_guy/post_training_project/**)",
+      "Bash(pkill:*)",
+      "Read(//Users/alexchilton/Downloads/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

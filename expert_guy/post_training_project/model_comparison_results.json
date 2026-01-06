@@ -1,0 +1,379 @@
+{
+  "test_words": [
+    "BATTY",
+    "STUNK",
+    "CHIRP",
+    "ABHOR",
+    "PITCH",
+    "STONE",
+    "LOYAL",
+    "CLOTH"
+  ],
+  "results": {
+    "baseline": [],
+    "sft": [],
+    "grpo": [
+      {
+        "secret": "BATTY",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "STUNK",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "CHIRP",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "ABHOR",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "PITCH",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "STONE",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "LOYAL",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      },
+      {
+        "secret": "CLOTH",
+        "model": "GRPO Checkpoint-120",
+        "result": "LOSS",
+        "turns": 6,
+        "guesses": [
+          {
+            "turn": 1,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 2,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 3,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 4,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 5,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          },
+          {
+            "turn": 6,
+            "guess": null,
+            "error": "Invalid format",
+            "completion_preview": "ADIEU\".</think>ADIEU guessed-word"
+          }
+        ]
+      }
+    ]
+  },
+  "summary": [
+    {
+      "model": "GRPO Checkpoint-120",
+      "wins": 0,
+      "total": 8,
+      "win_rate": 0.0,
+      "avg_turns": 0
+    }
+  ]
+}

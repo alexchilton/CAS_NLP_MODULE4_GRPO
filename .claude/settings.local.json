@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Read(//Users/alexchilton/**)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nUpdate GRPO training config - add checkpointing and stability improvements\n\n- Add checkpoint saving every 50 steps (save_strategy, save_steps, save_total_limit)\n- Reduce temperature from 1.2 to 1.0 for more stable generation\n- Add gradient clipping (max_grad_norm=1.0) to prevent training instability\n- Add do_sample=True and pad_token_id to generation_kwargs\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(mkdir:*)",
+      "Bash(kill:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(timeout:*)",
+      "Bash(tee:*)",
+      "Bash(rm:*)",
+      "Bash(git checkout:*)",
+      "Read(//private/tmp/**)",
+      "Bash(pkill:*)",
+      "Bash(cat:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

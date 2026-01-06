@@ -1,0 +1,27 @@
+# Configuration for Supervised Fine-Tuning (SFT) of Wordle Model
+
+training:
+  output_dir: "./sft_output"
+  epochs: 3
+  batch_size: 1
+  gradient_accumulation_steps: 4
+  save_steps: 50
+  logging_steps: 10
+  learning_rate: 2e-4
+  max_seq_length: 512
+
+model:
+  name: "Qwen/Qwen2.5-1.5B-Instruct"
+  use_quantization: false
+  lora_rank: 8
+  lora_alpha: 16
+
+data:
+  dataset_name: "predibase/wordle-sft"
+  train_split: "train"
+
+output:
+  checkpoint_dir: "./sft_checkpoints"
+  log_dir: "./sft_logs"
+  model_dir: "./sft_model"
+  loss_graph_path: "./sft_loss_graph.png"

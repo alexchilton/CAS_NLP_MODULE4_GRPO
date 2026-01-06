@@ -1,0 +1,88 @@
+DETAILED LOG - Base Qwen Testing
+Model: Qwen/Qwen2.5-3B-Instruct
+Temperature: 0.1
+Games: 1
+================================================================================
+
+
+################################################################################
+GAME 1/1
+################################################################################
+
+================================================================================
+Playing Wordle | Secret: SHIFT
+================================================================================
+
+--- Turn 1/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: This is the first turn. Please provide your best starting word.
+
+FULL RAW OUTPUT:
+**Current Knowledge:**
+*   **Correct Position (Green):** None
+*   **Wrong Position (Yellow):** None
+*   **Not in Word (Gray):** None
+*   **Words Already Guessed:** None
+
+<think>
+Since there are no initial clues, the goal is to gather as much information as possible with the first guess. A good strategy is to use a word that contains a variety of letters and is likely to give us some feedback about the position of those letters in the secret word.
+
+Let's consider using a word like 'SCARE'. This word includes several common letters and will help us determine if certain letters are in the correct position or if they are misplaced.
+</think>
+<guess>SCARE</guess>
+
+FULL THINKING:
+Since there are no initial clues, the goal is to gather as much information as possible with the first guess. A good strategy is to use a word that contains a variety of letters and is likely to give us some feedback about the position of those letters in the secret word.
+
+Let's consider using a word like 'SCARE'. This word includes several common letters and will help us determine if certain letters are in the correct position or if they are misplaced.
+
+EXTRACTED GUESS: SCARE
+
+GUESS: SCARE
+FEEDBACK: S(✓) C(x) A(x) R(x) E(x)
+STATUS: continue
+
+--- Turn 2/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `S _ _ _ _`
+*   **Wrong Position (Yellow):** None
+*   **Not in Word (Gray):** A, C, E, R
+*   **Words Already Guessed:** SCARE
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Given the current knowledge:
+- The word must start with 'S'.
+- There are no letters in the correct position, so we need to focus on the letters that are not in the word ('A', 'C', 'E', 'R').
+- We also know that the word cannot contain the letters 'A', 'C', 'E', or 'R'.
+We can deduce that the remaining letters must be from the set {B, D, F, G, H, I, L, M, N, O, P, Q, T, U, V, W, X, Y, Z}.
+Since the word starts with 'S', let's consider the second letter. If the second letter were 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q', 'T', 'U', 'V', 'W', 'X', 'Y', or 'Z', it would conflict with the fact that these letters are not in the word. Therefore, the second letter must be one of the remaining letters that are not in the word.
+Let's try the word 'SODIN' as our guess. This word contains the letter 'S' in the first position and 'O', 'D', 'I', 'N' which are not in the word.
+</think>
+<guess>SODIN</guess>
+
+FULL THINKING:
+Given the current knowledge:
+- The word must start with 'S'.
+- There are no letters in the correct position, so we need to focus on the letters that are not in the word ('A', 'C', 'E', 'R').
+- We also know that the word cannot contain the letters 'A', 'C', 'E', or 'R'.
+We can deduce that the remaining letters must be from the set {B, D, F, G, H, I, L, M, N, O, P, Q, T, U, V, W, X, Y, Z}.
+Since the word starts with 'S', let's consider the second letter. If the second letter were 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'L', 'M', 'N', 'O', 'P', 'Q', 'T', 'U', 'V', 'W', 'X', 'Y', or 'Z', it would conflict with the fact that these letters are not in the word. Therefore, the second letter must be one of the remaining letters that are not in the word.
+Let's try the word 'SODIN' as our guess. This word contains the letter 'S' in the first position and 'O', 'D', 'I', 'N' which are not in the word.
+
+EXTRACTED GUESS: SODIN

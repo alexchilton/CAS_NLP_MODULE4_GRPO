@@ -1,0 +1,10 @@
+{
+  "stage": 1,
+  "description": "Pure format SFT training",
+  "training_date": "2025-12-21T03:48:09.505429",
+  "training_examples": 2400,
+  "validation_examples": 100,
+  "best_format_accuracy": 1.0,
+  "epochs": 15,
+  "learning_rate": 3e-05
+}

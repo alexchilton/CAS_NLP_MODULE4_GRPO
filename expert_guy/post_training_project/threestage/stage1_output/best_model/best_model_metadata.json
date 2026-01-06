@@ -1,0 +1,8 @@
+{
+  "step": 325,
+  "format_accuracy": 1.0,
+  "word_accuracy": 0.7,
+  "composite_score": 0.8235294117647058,
+  "eval_loss": 0.38740867376327515,
+  "timestamp": "2025-12-21T01:44:40.230431"
+}

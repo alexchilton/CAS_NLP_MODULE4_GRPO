@@ -1,0 +1,26 @@
+# Production Configuration for Wordle GRPO Training (Laptop training)
+
+training:
+  batch_size: 2
+  num_generations: 8
+  max_samples: -1  # Full dataset
+  gradient_accumulation_steps: 16
+  epochs: 3
+  learning_rate: 1e-5
+
+model:
+  name: "Qwen/Qwen2.5-3B-Instruct"
+  use_quantization: true
+  lora_rank: 32
+  lora_alpha: 64
+  target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+
+data:
+  dataset_name: "predibase/wordle-grpo"
+  train_split: "train"
+  word_list_path: "data/wordle_word_list.csv"
+
+output:
+  checkpoint_dir: "./checkpoints"
+  log_dir: "./logs"
+  save_every_n_epochs: 1

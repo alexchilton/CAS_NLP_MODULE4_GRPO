@@ -1,0 +1,7 @@
+BASE MODEL RESULTS - 20251222_092336
+================================================================================
+CRANE: WIN in 2 turns
+AUDIO: WIN in 4 turns
+STARE: LOSS in 5 turns
+PLUMB: WIN in 6 turns
+FROST: LOSS in 6 turns

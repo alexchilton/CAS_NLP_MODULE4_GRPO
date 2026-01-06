@@ -1,0 +1,11 @@
+Model: google/gemma-3-4b-it
+Temperature: 0.1
+Precision: bfloat16
+Games: 1
+Wins: 1/1 (100.0%)
+Losses: 0/1 (0.0%)
+Invalid: 0/1 (0.0%)
+Avg turns to win: 6.00
+
+Detailed results:
+Game 1: LACKS - win in 6 turns - ['ADIEU', 'CRANE', 'CLASH', 'FLASK', 'JACKS', 'LACKS']

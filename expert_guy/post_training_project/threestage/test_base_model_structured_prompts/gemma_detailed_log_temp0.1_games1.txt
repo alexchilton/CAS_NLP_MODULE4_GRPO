@@ -1,0 +1,274 @@
+DETAILED LOG - Gemma-3-4b-it Testing
+Model: google/gemma-3-4b-it
+Temperature: 0.1
+Precision: bfloat16
+Games: 1
+================================================================================
+
+
+################################################################################
+GAME 1/1
+################################################################################
+
+================================================================================
+Playing Wordle | Secret: LACKS
+================================================================================
+
+--- Turn 1/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: This is the first turn. Please provide your best starting word.
+
+FULL RAW OUTPUT:
+Okay, let's begin!
+
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ _ _ _ _`
+*   **Wrong Position (Yellow):** None
+*   **Not in Word (Gray):** None
+*   **Words Already Guessed:** None
+
+<think>
+This is the very first guess. I need to maximize information gain by using a word with common, frequent letters. 'ADIEU' is a good choice because it uses four common vowels and avoids any letters that could be grayed out easily. It will quickly reveal whether vowels are present and their positions.
+</think>
+<guess>ADIEU</guess>
+
+FULL THINKING:
+This is the very first guess. I need to maximize information gain by using a word with common, frequent letters. 'ADIEU' is a good choice because it uses four common vowels and avoids any letters that could be grayed out easily. It will quickly reveal whether vowels are present and their positions.
+
+EXTRACTED GUESS: ADIEU
+
+GUESS: ADIEU
+FEEDBACK: A(-) D(x) I(x) E(x) U(x)
+STATUS: continue
+
+--- Turn 2/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ _ _ _ _`
+*   **Wrong Position (Yellow):** 'A'
+*   **Not in Word (Gray):** D, E, I, U
+*   **Words Already Guessed:** ADIEU
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Okay, let's analyze the clues. We have a word that ends in an unknown letter, and the 'A' is in the word but not in the fifth position. We also know the letters D, E, I, and U are not in the word.  Since 'A' is yellow, it must be in one of the first four positions.  Given that ADIEU has been guessed, we can eliminate those letters.
+
+My strategy here is to try and place the 'A' in a position where it can be tested effectively, and introduce new letters to narrow down the possibilities. 'CRANE' seems like a good option – it uses the yellow 'A' and avoids the gray letters. It also tests a common vowel and a common consonant.
+
+</think>
+<guess>CRANE</guess>
+
+FULL THINKING:
+Okay, let's analyze the clues. We have a word that ends in an unknown letter, and the 'A' is in the word but not in the fifth position. We also know the letters D, E, I, and U are not in the word.  Since 'A' is yellow, it must be in one of the first four positions.  Given that ADIEU has been guessed, we can eliminate those letters.
+
+My strategy here is to try and place the 'A' in a position where it can be tested effectively, and introduce new letters to narrow down the possibilities. 'CRANE' seems like a good option – it uses the yellow 'A' and avoids the gray letters. It also tests a common vowel and a common consonant.
+
+EXTRACTED GUESS: CRANE
+
+GUESS: CRANE
+FEEDBACK: C(-) R(x) A(-) N(x) E(x)
+STATUS: continue
+
+--- Turn 3/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ _ _ _ _`
+*   **Wrong Position (Yellow):** 'A', 'C'
+*   **Not in Word (Gray):** D, E, I, N, R, U
+*   **Words Already Guessed:** ADIEU, CRANE
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Okay, let's analyze the clues. We have a 5-letter word with the pattern `_ _ _ _ _`. The yellow letters are 'A' and 'C'. The gray letters are 'D', 'E', 'I', 'N', 'R', and 'U'. This means the word cannot contain any of those letters.
+
+Since 'A' and 'C' are in the word, but not in the correct positions, we need to place them strategically. The word must contain A and C, and exclude D, E, I, N, R, and U.
+
+Let's consider possible positions for A and C.  Given the constraints, a good starting point is to try to place 'C' in a position where it's more likely to be correct.  Also, since we've already guessed ADIEU and CRANE, we want to avoid repeating common vowel and consonant patterns.
+
+I'll start with a word that places 'C' in the second position, as it seems like a reasonable starting point. 'CLASH' fits the criteria. It uses 'A' and 'C', avoids the gray letters, and has 'C' in the second position.
+
+</think>
+<guess>CLASH</guess>
+
+FULL THINKING:
+Okay, let's analyze the clues. We have a 5-letter word with the pattern `_ _ _ _ _`. The yellow letters are 'A' and 'C'. The gray letters are 'D', 'E', 'I', 'N', 'R', and 'U'. This means the word cannot contain any of those letters.
+
+Since 'A' and 'C' are in the word, but not in the correct positions, we need to place them strategically. The word must contain A and C, and exclude D, E, I, N, R, and U.
+
+Let's consider possible positions for A and C.  Given the constraints, a good starting point is to try to place 'C' in a position where it's more likely to be correct.  Also, since we've already guessed ADIEU and CRANE, we want to avoid repeating common vowel and consonant patterns.
+
+I'll start with a word that places 'C' in the second position, as it seems like a reasonable starting point. 'CLASH' fits the criteria. It uses 'A' and 'C', avoids the gray letters, and has 'C' in the second position.
+
+EXTRACTED GUESS: CLASH
+
+GUESS: CLASH
+FEEDBACK: C(-) L(-) A(-) S(-) H(x)
+STATUS: continue
+
+--- Turn 4/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ _ _ _ _`
+*   **Wrong Position (Yellow):** 'A', 'C', 'L', 'S'
+*   **Not in Word (Gray):** D, E, H, I, N, R, U
+*   **Words Already Guessed:** ADIEU, CRANE, CLASH
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Okay, let's analyze the clues. We have a 5-letter word with the following constraints:
+
+*   It must end in one of A, C, L, or S (from the yellow letters).
+*   It must *not* contain D, E, H, I, N, R, or U (from the gray letters).
+*   We've already guessed ADIEU, CRANE, and CLASH.
+
+Given the yellow letters, I need to build a word that incorporates them. Since we've already used 'A', 'C', 'L', and 'S' in previous guesses, we need to be very careful about repetition. The gray letters significantly reduce the possible letters.
+
+Let's consider words ending in A, C, L, or S.  A good strategy is to try to place the yellow letters in positions where we can learn the most.  Since we have four yellow letters, let's try to use them in different positions.
+
+I'll start with a word that uses 'L' in the third position, as it's a common letter and we haven't used it much yet.  'FLASK' fits the criteria. It contains L, and doesn't use any of the gray letters. It also has A, C, and S as yellow letters.
+
+</think>
+<guess>FLASK</guess>
+
+FULL THINKING:
+Okay, let's analyze the clues. We have a 5-letter word with the following constraints:
+
+*   It must end in one of A, C, L, or S (from the yellow letters).
+*   It must *not* contain D, E, H, I, N, R, or U (from the gray letters).
+*   We've already guessed ADIEU, CRANE, and CLASH.
+
+Given the yellow letters, I need to build a word that incorporates them. Since we've already used 'A', 'C', 'L', and 'S' in previous guesses, we need to be very careful about repetition. The gray letters significantly reduce the possible letters.
+
+Let's consider words ending in A, C, L, or S.  A good strategy is to try to place the yellow letters in positions where we can learn the most.  Since we have four yellow letters, let's try to use them in different positions.
+
+I'll start with a word that uses 'L' in the third position, as it's a common letter and we haven't used it much yet.  'FLASK' fits the criteria. It contains L, and doesn't use any of the gray letters. It also has A, C, and S as yellow letters.
+
+EXTRACTED GUESS: FLASK
+
+GUESS: FLASK
+FEEDBACK: F(x) L(-) A(-) S(-) K(-)
+STATUS: continue
+
+--- Turn 5/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ _ _ _ _`
+*   **Wrong Position (Yellow):** 'A', 'C', 'K', 'L', 'S'
+*   **Not in Word (Gray):** D, E, F, H, I, N, R, U
+*   **Words Already Guessed:** ADIEU, CRANE, CLASH, FLASK
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Okay, let's analyze the clues. We have a 5-letter word with the following constraints:
+
+*   It must contain the letters A, C, K, L, and S (in any order) but not in the positions indicated by the yellow letters.
+*   It must *not* contain the letters D, E, F, H, I, N, R, or U.
+
+This significantly reduces the possibilities.  Since 'A', 'C', 'K', 'L', and 'S' are present, we need to build a word around those letters, avoiding the yellow letters. Let's consider common letter combinations and potential word structures. The yellow letters are scattered, so we need to be careful about placement.
+
+I'll start by trying a word that uses as many of the yellow letters as possible, but in incorrect positions, to see if we can eliminate more possibilities.  'SALCK' is a potential candidate, but it contains 'K' which is yellow.
+
+Let's try a word that avoids the yellow letters as much as possible while incorporating the known letters. Considering the constraints, 'JACKS' seems like a reasonable starting point. It uses A, C, K, L, and S, and avoids the yellow letters and the gray letters.
+
+</think>
+<guess>JACKS</guess>
+
+FULL THINKING:
+Okay, let's analyze the clues. We have a 5-letter word with the following constraints:
+
+*   It must contain the letters A, C, K, L, and S (in any order) but not in the positions indicated by the yellow letters.
+*   It must *not* contain the letters D, E, F, H, I, N, R, or U.
+
+This significantly reduces the possibilities.  Since 'A', 'C', 'K', 'L', and 'S' are present, we need to build a word around those letters, avoiding the yellow letters. Let's consider common letter combinations and potential word structures. The yellow letters are scattered, so we need to be careful about placement.
+
+I'll start by trying a word that uses as many of the yellow letters as possible, but in incorrect positions, to see if we can eliminate more possibilities.  'SALCK' is a potential candidate, but it contains 'K' which is yellow.
+
+Let's try a word that avoids the yellow letters as much as possible while incorporating the known letters. Considering the constraints, 'JACKS' seems like a reasonable starting point. It uses A, C, K, L, and S, and avoids the yellow letters and the gray letters.
+
+EXTRACTED GUESS: JACKS
+
+GUESS: JACKS
+FEEDBACK: J(x) A(✓) C(✓) K(✓) S(✓)
+STATUS: continue
+
+--- Turn 6/6 ---
+
+FULL PROMPT:
+System: You are an expert Wordle-solving AI. Your primary directive is to deduce the secret 5-letter English word with flawless logic and strategy. Adherence to the rules and format is critical.
+
+### Core Pri...
+
+User: You are playing a game of Wordle. Analyze the clues and provide your next guess.
+**Current Knowledge:**
+*   **Correct Position (Green):** `_ A C K S`
+*   **Wrong Position (Yellow):** 'L'
+*   **Not in Word (Gray):** D, E, F, H, I, J, N, R, U
+*   **Words Already Guessed:** ADIEU, CRANE, CLASH, FLASK, JACKS
+
+Your task is to find a valid 5-letter English word that fits all the clues above.
+Provide your reasoning within <think> tags, and then your final guess within <guess> tags.
+
+FULL RAW OUTPUT:
+<think>
+Okay, let's analyze the clues. We have `_ A C K S` with 'L' as a yellow letter and 'D, E, F, H, I, J, N, R, U' as gray letters. This means 'L' is in the word but not in the fourth position. The word must contain 'A', 'C', 'K', and 'S'.
+
+Since 'L' is yellow, it can't be in the 4th position. We need to place 'L' in one of the remaining spots. Considering the gray letters, we can eliminate many possibilities. The word must end in 'S' because of the green 'S'.
+
+Let's consider possible arrangements. We know 'A' is in the second position, 'C' is in the third, and 'K' is in the fourth. This leaves the first position for 'L'. So, we have `L A C K S`. This word uses all the required letters and satisfies all the constraints.
+
+</think>
+<guess>LACKS</guess>
+
+FULL THINKING:
+Okay, let's analyze the clues. We have `_ A C K S` with 'L' as a yellow letter and 'D, E, F, H, I, J, N, R, U' as gray letters. This means 'L' is in the word but not in the fourth position. The word must contain 'A', 'C', 'K', and 'S'.
+
+Since 'L' is yellow, it can't be in the 4th position. We need to place 'L' in one of the remaining spots. Considering the gray letters, we can eliminate many possibilities. The word must end in 'S' because of the green 'S'.
+
+Let's consider possible arrangements. We know 'A' is in the second position, 'C' is in the third, and 'K' is in the fourth. This leaves the first position for 'L'. So, we have `L A C K S`. This word uses all the required letters and satisfies all the constraints.
+
+EXTRACTED GUESS: LACKS
+
+GUESS: LACKS
+FEEDBACK: L(✓) A(✓) C(✓) K(✓) S(✓)
+STATUS: win

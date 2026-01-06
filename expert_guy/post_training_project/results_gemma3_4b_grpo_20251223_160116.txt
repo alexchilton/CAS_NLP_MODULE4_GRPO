@@ -1,0 +1,7 @@
+GRPO TRAINED MODEL RESULTS (Checkpoint-120) - 20251223_160116
+================================================================================
+CRANE: WIN in 2 turns
+AUDIO: LOSS in 6 turns
+STARE: LOSS in 4 turns
+PLUMB: LOSS in 6 turns
+FROST: LOSS in 5 turns

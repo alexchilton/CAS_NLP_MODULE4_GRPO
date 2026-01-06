@@ -1,0 +1,9 @@
+Model: Qwen/Qwen2.5-3B-Instruct
+Temperature: 0.1
+Games: 1
+Wins: 0/1 (0.0%)
+Losses: 0/1 (0.0%)
+Invalid: 1/1 (100.0%)
+
+Detailed results:
+Game 1: SHIFT - invalid_guess_Invalid: not in word list in 2 turns - ['SCARE']

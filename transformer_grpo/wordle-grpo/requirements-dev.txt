@@ -1,0 +1,23 @@
+# Development dependencies for Mac (CPU/MPS)
+# Use this for local development and testing on macOS
+# Install with: pip install -r requirements-dev.txt
+
+# Include all core dependencies
+-r requirements.txt
+
+# Testing framework
+pytest
+
+# Code formatting and linting
+black
+flake8
+
+# Interactive development
+ipython
+jupyter
+
+# Data visualization (for notebooks)
+matplotlib
+seaborn
+
+# Note: bitsandbytes is NOT included as it requires CUDA and is not compatible with Mac

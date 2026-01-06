@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      "Bash(python -m pytest tests/ -v --tb=short)",
+      "Bash(python -m pytest tests/test_wordle_game.py::TestFilterCandidates::test_filter_with_one_guess -v)",
+      "Bash(python -m pytest tests/ -v --tb=line)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo create:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(git push:*)",
+      "Bash(timeout 180 python scripts/train.py --config configs/dev_config.yaml)",
+      "Bash(tee:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,7 @@
+SFT TRAINED MODEL RESULTS - 20251222_092336
+================================================================================
+CRANE: WIN in 6 turns
+AUDIO: WIN in 6 turns
+STARE: LOSS in 6 turns
+PLUMB: LOSS in 4 turns
+FROST: LOSS in 5 turns
