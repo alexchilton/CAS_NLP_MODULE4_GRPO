@@ -234,9 +234,43 @@ engineering in Approach 2, <strong>all models still failed</strong>.
 Better prompts couldn’t overcome fundamental capacity limitations or
 reward hacking.</p>
 </section>
-<section id="slide-5-the-context-length-problem"
+<section id="slide-5-wordle-grpo-system-architecture"
 class="slide level2 allowframebreaks">
-<h2 class="allowframebreaks">Slide 5: The Context Length Problem</h2>
+<h2 class="allowframebreaks">Slide 5: Wordle GRPO System
+Architecture</h2>
+<pre><code>Training Pipeline:
+──────────────────
+Dataset (HF/Local)
+     │
+     ▼
+GRPO Trainer
+     │
+     ▼
+Model + LoRA (Qwen 2.5-3B)
+     │
+     ▼
+Text Generation (Batched)
+     │
+     ▼
+Reward Function
+(Format + Feedback + Value)
+     │
+     ▼
+Checkpoint (LoRA weights)
+
+Evaluation Pipeline:
+────────────────────
+Checkpoint (Trained)
+     │
+     ▼
+Evaluator (Play games)
+     │
+     ▼
+Metrics (Win rate, rewards)</code></pre>
+</section>
+<section id="slide-6-the-context-length-problem"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 6: The Context Length Problem</h2>
 <h3 id="when-the-answer-is-out-of-reach">“When the Answer is Out of
 Reach”</h3>
 <p><strong>The Problem:</strong> During SFT, the model needs to learn
@@ -339,27 +373,27 @@ class="slide level2 allowframebreaks">
 <code>transformer_grpo/wordle-grpo/evaluation_results/transcripts_20251026_070527.json</code></p>
 <p>The model abandons strategy and defaults to guessing the word “THINK”
 repeatedly, burning through its attempts.</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;secret_word&quot;</span><span class="fu">:</span> <span class="st">&quot;CLAUT&quot;</span><span class="fu">,</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;guesses&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;THINK&quot;</span><span class="ot">,</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SHOUT&quot;</span><span class="ot">,</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ENLIT&quot;</span><span class="ot">,</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;FIERE&quot;</span><span class="ot">,</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;IDIOM&quot;</span><span class="ot">,</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PACED&quot;</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;feedbacks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;T(-) H(x) I(x) N(x) K(x)&quot;</span><span class="ot">,</span>  <span class="er">//</span> <span class="er">Guess</span> <span class="dv">1</span><span class="er">:</span> <span class="er">THINK</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;S(x) H(x) O(x) U(Y) T(Y)&quot;</span><span class="ot">,</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E(x) N(x) L(-) I(x) T(Y)&quot;</span><span class="ot">,</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;F(x) I(x) E(x) R(x) E(x)&quot;</span><span class="ot">,</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I(x) D(x) I(x) O(x) M(x)&quot;</span><span class="ot">,</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;P(x) A(-) C(-) E(x) D(x)&quot;</span></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;won&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;secret_word&quot;</span><span class="fu">:</span> <span class="st">&quot;CLAUT&quot;</span><span class="fu">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;guesses&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;THINK&quot;</span><span class="ot">,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SHOUT&quot;</span><span class="ot">,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ENLIT&quot;</span><span class="ot">,</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;FIERE&quot;</span><span class="ot">,</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;IDIOM&quot;</span><span class="ot">,</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PACED&quot;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;feedbacks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;T(-) H(x) I(x) N(x) K(x)&quot;</span><span class="ot">,</span>  <span class="er">//</span> <span class="er">Guess</span> <span class="dv">1</span><span class="er">:</span> <span class="er">THINK</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;S(x) H(x) O(x) U(Y) T(Y)&quot;</span><span class="ot">,</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E(x) N(x) L(-) I(x) T(Y)&quot;</span><span class="ot">,</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;F(x) I(x) E(x) R(x) E(x)&quot;</span><span class="ot">,</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I(x) D(x) I(x) O(x) M(x)&quot;</span><span class="ot">,</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;P(x) A(-) C(-) E(x) D(x)&quot;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;won&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p><em>(In other runs, it guessed “THINK” 6 times in a row.)</em></p>
 </section>
 <section id="slide-11-the-large-model-gemma-3-4b"
@@ -580,13 +614,6 @@ unstable, RL will simply drive it off the nearest cliff.</p>
         // devices. It is advisable to set this to a lower number than
         // viewDistance in order to save resources.
         mobileViewDistance: 2,
-
-        // The "normal" size of the presentation, aspect ratio will be preserved
-        // when the presentation is scaled to fit different resolutions. Can be
-        // specified using percentage units.
-        width: 1600,
-
-        height: 900,
 
         // reveal.js plugins
         plugins: [
