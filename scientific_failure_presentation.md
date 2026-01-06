@@ -126,36 +126,31 @@ You are playing a game of Wordle. Analyze the clues:
 
 ## Slide 5: Wordle GRPO System Architecture
 
+**Training Flow:**
 ```
-Training Pipeline:
-──────────────────
-Dataset (HF/Local)
-     │
-     ▼
-GRPO Trainer
-     │
-     ▼
-Model + LoRA (Qwen 2.5-3B)
-     │
-     ▼
-Text Generation (Batched)
-     │
-     ▼
+   Dataset
+      ↓
+ GRPO Trainer → Checkpoint
+      ↓            (LoRA)
+   Model
+ (Qwen 2.5-3B)
+      ↓
+ Generation
+      ↓
 Reward Function
-(Format + Feedback + Value)
-     │
-     ▼
-Checkpoint (LoRA weights)
+(Format+Feedback
+    +Value)
+```
 
-Evaluation Pipeline:
-────────────────────
-Checkpoint (Trained)
-     │
-     ▼
-Evaluator (Play games)
-     │
-     ▼
-Metrics (Win rate, rewards)
+**Evaluation Flow:**
+```
+  Checkpoint
+      ↓
+  Evaluator
+ (Play games)
+      ↓
+   Metrics
+ (Win rate)
 ```
 
 ---
