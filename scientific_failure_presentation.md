@@ -181,8 +181,9 @@ The model learns to reason but not to *conclude*. It enters the "think loop" bec
 Gemma 3 4B exhibited completely different behavior based on generation temperature.
 
 **Temperature 0.7 (Higher Randomness):**
-- Model collapse into infinite `<think>` loops
-- Degenerate repetition
+- Excessive reasoning - didn't know when to stop
+- Hallucinated extra feedback and guesses
+- Made up game states that didn't exist
 - ~0% win rate
 
 **Temperature 0.3 (Lower Randomness):**
