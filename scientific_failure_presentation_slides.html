@@ -141,23 +141,27 @@ generation loop.</p>
 class="slide level2 allowframebreaks">
 <h2 class="allowframebreaks">Slide 2: SFT Data Format (Teaching the
 Rules)</h2>
-<p><strong>Phase 1: Supervised Fine-Tuning</strong> We taught the model
-<em>how</em> to play by providing thousands of “perfect games” generated
-by a solver algorithm.</p>
-<p><strong>Structure:</strong> * <strong>Prompt:</strong> The game state
-(System instructions + “Make your guess”). *
-<strong>Completion:</strong> A perfect reasoning trace + the optimal
-guess.</p>
-<p><strong>Sample (<code>sft_synthetic_data.jsonl</code>):</strong></p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;prompt&quot;</span><span class="fu">:</span> <span class="st">&quot;You are playing Wordle... Output format:</span><span class="ch">\n</span><span class="st">&lt;think&gt;...&lt;/think&gt;&lt;guess&gt;WORD&lt;/guess&gt;</span><span class="ch">\n\n</span><span class="st">Make your first guess:&quot;</span><span class="fu">,</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;completion&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;think&gt;Beginning with a balanced mix of vowels and consonants in common positions.&lt;/think&gt;&lt;guess&gt;CODAS&lt;/guess&gt;&quot;</span><span class="fu">,</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;guess&quot;</span><span class="fu">:</span> <span class="st">&quot;CODAS&quot;</span><span class="fu">,</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;stage&quot;</span><span class="fu">:</span> <span class="st">&quot;first_guess&quot;</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-<p><em>Note: In SFT, the model is penalized for ANY deviation from this
-exact text.</em></p>
+<p><strong>Phase 1: Supervised Fine-Tuning</strong> We used the
+Predibase Wordle-SFT dataset with expert demonstrations.</p>
+<p><strong>Structure:</strong> * <strong>Prompt:</strong> System
+instructions + game rules + examples + “Make your guess” *
+<strong>Completion:</strong> Detailed reasoning in
+<code>&lt;think&gt;</code> tags + guess in <code>&lt;guess&gt;</code>
+tags</p>
+<p><strong>Sample (<code>predibase/wordle-sft</code>):</strong></p>
+<pre><code>Prompt: &quot;You are playing Wordle... [detailed rules]...
+Make your first 5-letter word guess.&quot;
+
+Completion: &quot;&lt;think&gt;This is my first guess. Good first 
+words include common letters like E, A, R, T, S...
+I&#39;ll choose CRANE with common letters...&lt;/think&gt;
+&lt;guess&gt;CRANE&lt;/guess&gt;&quot;</code></pre>
+<p><strong>The Problem:</strong> Full examples often exceeded
+<strong>4000+ tokens</strong>, but our models were configured for
+<strong>512 tokens max</strong>—meaning the <code>&lt;guess&gt;</code>
+tag was frequently cut off during training.</p>
+<p><em>Note: This context mismatch became a critical failure
+point.</em></p>
 </section>
 <section id="slide-3-grpo-data-format-the-test"
 class="slide level2 allowframebreaks">
