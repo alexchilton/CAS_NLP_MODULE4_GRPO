@@ -446,11 +446,25 @@ follow instructions.</li>
 <li><strong>Optimization Failure (Gemma):</strong> Model collapse
 (overfitting to specific tokens).</li>
 </ol>
-<p><strong>Final Takeaway:</strong> These failures demonstrate that
-<strong>SFT is the ceiling</strong>. GRPO acts as a selector, not a
-creator. It cannot “invent” reasoning capabilities that were not present
-in the supervised fine-tuning stage. If the underlying policy is
-unstable, RL will simply drive it off the nearest cliff.</p>
+<p><strong>Final Takeaway:</strong> These failures reveal
+<strong>critical prerequisites for GRPO success</strong>:</p>
+<ol type="1">
+<li><strong>Data quality matters</strong> - Context length mismatches
+(512 vs 4000+ tokens) broke SFT, creating an unstable foundation for
+GRPO.</li>
+<li><strong>Hyperparameters are critical</strong> -
+<code>num_generations=2</code> caused 75% of training steps to be
+skipped. Proper GRPO likely requires 8+ generations.</li>
+<li><strong>Compute constraints are real</strong> - Limited batch sizes,
+epochs, and hardware prevented proper ablation studies and
+hyperparameter tuning.</li>
+</ol>
+<p><strong>What we learned:</strong> GRPO didn’t fail because the
+algorithm is broken—it failed because the <strong>practical
+implementation requirements</strong> (clean data, sufficient compute,
+proper hyperparameters) weren’t met. The failure modes we documented are
+valuable <strong>warnings</strong> for future work, not evidence that
+GRPO can’t work for structured reasoning tasks.</p>
 </section></section>
     </div>
   </div>
