@@ -124,7 +124,36 @@ You are playing a game of Wordle. Analyze the clues:
 
 ---
 
-## Slide 5: The Context Length Problem {.allowframebreaks}
+## Slide 5: Wordle GRPO System Architecture {.allowframebreaks}
+
+```
+┌──────────────────────────────────────────────┐
+│          Wordle GRPO System                  │
+├──────────────────────────────────────────────┤
+│                                              │
+│  Dataset ──▶ GRPO Trainer ──▶ Checkpoint    │
+│  (HF/Local)      │              (LoRA)      │
+│                  ▼                           │
+│           Model + LoRA                       │
+│         (Qwen 2.5-3B)                        │
+│                  │                           │
+│                  ▼                           │
+│         Text Generation                      │
+│           (Batched)                          │
+│                  │                           │
+│                  ▼                           │
+│        Reward Function                       │
+│    (Format+Feedback+Value)                   │
+│                                              │
+│  Checkpoint ──▶ Evaluator ──▶ Metrics       │
+│   (Trained)    (Play games)  (Win rate)     │
+│                                              │
+└──────────────────────────────────────────────┘
+```
+
+---
+
+## Slide 6: The Context Length Problem {.allowframebreaks}
 ### "When the Answer is Out of Reach"
 
 **The Problem:**
