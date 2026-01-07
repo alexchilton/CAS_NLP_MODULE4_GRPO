@@ -69,6 +69,8 @@ We discovered **three distinct failure modes** across different model scales:
 
 ### `transformer_grpo/wordle-grpo/` - Initial Implementation
 
+> 📖 **Detailed Documentation:** See [docs/transformer_grpo_README.md](docs/transformer_grpo_README.md) for complete setup and usage instructions.
+
 **Purpose:** First attempt at GRPO training for Wordle using GPT-2 and Qwen models.
 
 **Key Components:**
@@ -105,6 +107,8 @@ We discovered **three distinct failure modes** across different model scales:
 ---
 
 ### `expert_guy/post_training_project/` - Advanced Experiments
+
+> 📖 **Detailed Documentation:** See [docs/expert_guy_README.md](docs/expert_guy_README.md) for complete project details and methodology.
 
 **Purpose:** Second experimental track focused on Gemma 3 4B with improved methodology and synthetic data attempts.
 
@@ -232,6 +236,10 @@ pandoc scientific_failure_presentation_v2.md \
 ---
 
 ## 🚀 How to Run
+
+> 💡 **For detailed setup instructions:**
+> - Initial implementation: See [docs/transformer_grpo_README.md](docs/transformer_grpo_README.md)
+> - Advanced experiments: See [docs/expert_guy_README.md](docs/expert_guy_README.md)
 
 ### Prerequisites
 
