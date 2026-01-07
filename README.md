@@ -21,6 +21,7 @@ We discovered **three distinct failure modes** across different model scales:
 - **Hyperparameter Sensitivity:** `num_generations=2` caused 75% of training steps to be skipped
 - **Temperature Instability:** Gemma 3 4B showed drastically different behavior at 0.7 vs 0.3
 - **Prompt Engineering Limitations:** Two different prompting strategies both failed
+- **Reward Function Design:** Extensive experimentation with reward weights and formulations (7+ iterations documented in `archive/reward_functions_experiments/`)
 
 ---
 
@@ -30,15 +31,33 @@ We discovered **three distinct failure modes** across different model scales:
 
 ```
 .
-├── scientific_failure_presentation.md          # Main presentation (markdown)
-├── scientific_failure_presentation_v2.md       # Presentation with Beamer tags
-├── scientific_failure_presentation_slides.html # Generated HTML slides
-├── scientific_failure_presentation_slides.pdf  # PDF slides
-├── slides_style.css                            # Custom CSS for slides
-├── add_framebreaks.py                          # Build script for presentations
-├── transformer_grpo/                           # Initial GRPO implementation (GPT-2/Qwen)
-├── expert_guy/                                 # Advanced experiments (Gemma 3 4B)
-└── whatever/                                   # Scratch/experimental code
+├── README.md                    # This file
+├── docs/                        # Documentation and presentations
+│   ├── scientific_failure_presentation.md        # Main presentation
+│   ├── scientific_failure_presentation_v2.md     # Beamer version
+│   ├── scientific_failure_presentation_slides.*  # Generated slides
+│   ├── LEARNINGS.md                              # Detailed insights (22KB!)
+│   ├── DATA_GUIDE.md                             # Dataset documentation
+│   ├── DELIVERABLES_PLAN.md                      # Project planning
+│   ├── REWARD_SYSTEM_SUMMARY.md                  # Reward function analysis
+│   ├── *_IMPROVEMENTS.md                         # Iteration logs
+│   ├── transformer_grpo_README.md                # Original project README
+│   └── expert_guy_README.md                      # Advanced experiments README
+├── tests/                       # Test files for reward functions and evaluation
+│   ├── test_reward*.py          # Reward function unit tests
+│   ├── compare_reward_functions.py  # Ablation studies
+│   └── transformer_grpo_test_rewards.py
+├── archive/                     # Archived experimental code
+│   └── reward_functions_experiments/  # 7+ reward function iterations
+│       ├── reward_functions_original.py
+│       ├── reward_functions_improved.py
+│       ├── reward_functions_strict.py
+│       ├── reward_functions_round4_backup.py
+│       ├── reward_functions_round5.py
+│       └── reward_functions_OLD_BROKEN.py
+├── transformer_grpo/            # Initial GRPO implementation (GPT-2/Qwen)
+├── expert_guy/                  # Advanced experiments (Gemma 3 4B)
+└── whatever/                    # Scratch/experimental code
 ```
 
 ### `transformer_grpo/wordle-grpo/` - Initial Implementation
@@ -234,6 +253,31 @@ pandoc scientific_failure_presentation_v2.md \
 **Result:** ✅ Identified critical instability at temp 0.7  
 **Finding:** Model hallucinated extra game states at 0.7, performed better at 0.1-0.3  
 **Location:** `expert_guy/post_training_project/threestage/test_base_model_structured_prompts/gemma_results_temp0.1_games150.txt`
+
+### Experiment 6: Reward Function Iterations (7+ versions)
+**Goal:** Find optimal balance between format compliance and strategic play  
+**Approaches Tried:**
+1. **Original** - Equal weights for format/feedback/value
+2. **Strict** - Heavy penalties for any mistakes  
+3. **Improved** - Graduated rewards with partial credit
+4. **Round 4** - Focus on information gain
+5. **Round 5** - Curriculum learning approach
+6. **Base** - Simplified reward structure
+7. **OLD_BROKEN** - Early version with numerical issues
+
+**Key Learnings:**
+- Format rewards dominated (55% of total) → model optimized for easy objective
+- Graduated rewards helped early training but didn't solve strategic learning
+- No reward function could overcome context length or `num_generations` issues
+- Reward engineering is iterative but has fundamental limits
+
+**Test Suite:** See `tests/test_reward*.py` for ablation studies  
+**Archive:** All versions preserved in `archive/reward_functions_experiments/`  
+**Analysis:** See `docs/REWARD_SYSTEM_SUMMARY.md` for detailed comparison
+
+**Current Implementation:**
+- `expert_guy/post_training_project/reward_functions.py` - Active version
+- `transformer_grpo/wordle-grpo/src/training/reward_functions.py` - Original implementation
 
 ---
 
