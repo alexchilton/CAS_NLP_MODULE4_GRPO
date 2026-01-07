@@ -231,6 +231,159 @@ pandoc scientific_failure_presentation_v2.md \
 
 ---
 
+## 🚀 How to Run
+
+### Prerequisites
+
+```bash
+# Clone repository
+git clone https://github.com/alexchilton/CAS_NLP_MODULE4_GRPO.git
+cd CAS_NLP_MODULE4_GRPO
+
+# Install dependencies
+pip install -r transformer_grpo/wordle-grpo/requirements.txt
+```
+
+### Training Scripts
+
+#### Option 1: Initial Implementation (transformer_grpo)
+
+**Simple GRPO Training (GPT-2/Qwen):**
+```bash
+cd transformer_grpo/wordle-grpo
+
+# Development training on Mac (small model, limited data)
+python scripts/train.py --config configs/dev_config.yaml
+
+# Production training (Qwen 2.5-1.5B, full dataset)
+python scripts/train.py --config configs/qwen_config.yaml
+
+# Resume from checkpoint
+python scripts/train.py --config configs/qwen_config.yaml \
+  --resume checkpoints_qwen/checkpoint_epoch_1
+```
+
+**Supervised Fine-Tuning First:**
+```bash
+# Train SFT baseline
+python scripts/sft_train.py --config configs/qwen_config.yaml
+
+# Then run GRPO
+python scripts/train.py --config configs/qwen_config.yaml
+```
+
+**Evaluation:**
+```bash
+# Evaluate trained checkpoint
+python scripts/evaluate.py \
+  --checkpoint checkpoints_qwen/checkpoint_epoch_1 \
+  --num-games 20
+```
+
+#### Option 2: Advanced Implementation (expert_guy)
+
+**Three-Stage Training Pipeline (Qwen 2.5-3B):**
+```bash
+cd expert_guy/post_training_project/threestage
+
+# Stage 1: Format Learning (SFT)
+python stage1_format_sft.py
+# Output: stage1_output/final_model/
+
+# Stage 2: Light GRPO (KL penalty + basic rewards)
+python stage2_light_grpo.py
+# Output: stage2_output/
+
+# Stage 3: Full GRPO (complex rewards)
+python stage3_full_grpo.py
+# Output: stage3_output/
+```
+
+**Single-Script Training (Gemma 3 4B):**
+```bash
+cd expert_guy/post_training_project
+
+# GRPO with Predibase data
+python basecase_l3_dataset_peft.py
+
+# GRPO with local data
+python grpo_local_data_peft.py
+
+# Temperature sensitivity experiments
+python grpo_local_data_sensitivity_temperature.py
+```
+
+**Testing Trained Models:**
+```bash
+# Compare base/SFT/GRPO models
+python tests/test_gemma3_4b_comparison.py
+
+# Test single checkpoint
+python tests/test_trained_model.py
+
+# Edge case testing
+python tests/test_edge_cases.py
+```
+
+### Configuration Files
+
+**transformer_grpo:**
+- `configs/dev_config.yaml` - Development (GPT-2, 10 samples, CPU/MPS)
+- `configs/qwen_config.yaml` - Production (Qwen 1.5B, 100 samples, MPS)
+- `configs/prod_config.yaml` - Full production (Qwen 3B, all data, CUDA)
+
+**expert_guy:**
+- `expert_guy/post_training_project/configs/wordle_grpo.toml` - GRPO parameters
+- `expert_guy/post_training_project/threestage/sft_config.yaml` - SFT configuration (note: max_seq_length=512 issue here!)
+
+### Key Parameters to Adjust
+
+**Critical for Success:**
+```python
+# In config files or script arguments:
+num_generations = 8  # NOT 2! (causes 75% skipped steps)
+max_seq_length = 4096  # Match your SFT data length (512 is too short)
+batch_size = 4  # Higher if you have GPU memory
+learning_rate = 3e-7  # Conservative for GRPO
+temperature = 0.3  # For inference (0.7 causes hallucinations)
+```
+
+**Reward Weights (curriculum learning):**
+```python
+# Early training (epochs 0-1): Learn format
+format_weight = 1.0
+feedback_weight = 0.3
+value_weight = 0.3
+
+# Later training (epochs 2+): Learn strategy
+format_weight = 0.3
+feedback_weight = 1.0
+value_weight = 1.0
+```
+
+### Viewing Results
+
+**WandB Dashboard:**
+Visit [https://wandb.ai/alexchilton/huggingface](https://wandb.ai/alexchilton/huggingface) for:
+- Training loss curves
+- Reward progression
+- Generation examples
+- Hyperparameter tracking
+
+**Local Logs:**
+```bash
+# Training logs
+expert_guy/post_training_project/threestage/outputs/case.log
+
+# Evaluation results
+transformer_grpo/wordle-grpo/evaluation_results/
+
+# Game transcripts
+transformer_grpo/wordle-grpo/evaluation_results/transcripts_*.json
+```
+
+---
+
 ## 🔬 What We Tried
 
 ### Experiment 1: GPT-2 Baseline
