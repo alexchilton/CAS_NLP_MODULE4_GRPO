@@ -4,6 +4,8 @@
 **Student:** Alex Chilton  
 **Project:** Training Language Models to Play Wordle using Group Relative Policy Optimization
 
+> 📊 **Training Logs:** See [Weights & Biases dashboard](https://wandb.ai/alexchilton/huggingface) for detailed training metrics and experiment tracking
+
 ## 📊 Project Overview
 
 This repository documents an experimental investigation into training language models to play Wordle using GRPO (Group Relative Policy Optimization). Rather than showcasing success, this project provides a **comprehensive analysis of failure modes** encountered when applying RL to structured reasoning tasks.
@@ -43,10 +45,15 @@ We discovered **three distinct failure modes** across different model scales:
 │   ├── *_IMPROVEMENTS.md                         # Iteration logs
 │   ├── transformer_grpo_README.md                # Original project README
 │   └── expert_guy_README.md                      # Advanced experiments README
-├── tests/                       # Test files for reward functions and evaluation
+├── tests/                       # Test files and evaluation scripts (17 files)
 │   ├── test_reward*.py          # Reward function unit tests
 │   ├── compare_reward_functions.py  # Ablation studies
-│   └── transformer_grpo_test_rewards.py
+│   ├── test_gemma3_4b_comparison.py  # Base/SFT/GRPO comparison
+│   ├── test_model_comparison.py      # Cross-model evaluation
+│   ├── test_trained_model.py         # Checkpoint testing
+│   ├── test_edge_cases.py            # Edge case validation
+│   ├── test_hallucination.py         # Hallucination detection
+│   └── transformer_grpo_test_rewards.py  # Original test suite
 ├── archive/                     # Archived experimental code
 │   └── reward_functions_experiments/  # 7+ reward function iterations
 │       ├── reward_functions_original.py
