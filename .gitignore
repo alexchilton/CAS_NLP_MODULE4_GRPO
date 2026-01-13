@@ -37,9 +37,9 @@ checkpoints/
 **/checkpoint-*/
 **/final_model/
 **/wandb/
-*.pth
 *.ckpt
 trainer_state.json
+*.pt
 
 # Model files (too large)
 *.pth
