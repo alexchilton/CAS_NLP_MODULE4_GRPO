@@ -32,6 +32,15 @@ checkpoints/
 *.safetensors
 *.bin
 
+# Training outputs (any depth) & artefacts - Lara 
+**/output*/
+**/checkpoint-*/
+**/final_model/
+**/wandb/
+*.pth
+*.ckpt
+trainer_state.json
+
 # Model files (too large)
 *.pth
 *.ckpt
