@@ -1,7 +1,7 @@
 # GRPO for Wordle: A Scientific Failure Analysis
 
 **Course:** BERN Module 4 - Transformer GRPO  
-**Student:** Alex Chilton  
+**Student:** Alex Chilton, Lara Nonis 
 **Project:** Training Language Models to Play Wordle using Group Relative Policy Optimization
 
 > 📊 **Training Logs:** See [Weights & Biases dashboard](https://wandb.ai/alexchilton/huggingface) for detailed training metrics and experiment tracking
