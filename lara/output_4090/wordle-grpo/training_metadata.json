@@ -1,0 +1,19 @@
+{
+  "training_date": "2026-01-09T18:15:02.835804",
+  "model_name": "Qwen/Qwen2.5-0.5B-Instruct",
+  "training_args": {
+    "num_epochs": 3.0,
+    "learning_rate": 1e-05,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 8,
+    "temperature_schedule": "0.7 \u2192 0.4 at 40%",
+    "max_completion_length": 512,
+    "gradient_checkpointing": true
+  },
+  "notes": [
+    "Dense reward based on secret/guess overlap",
+    "Penalty for invalid guesses",
+    "Penalty for repeated guesses",
+    "Extraction from <solution>WORD</solution> where available"
+  ]
+}

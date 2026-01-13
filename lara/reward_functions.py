@@ -66,6 +66,62 @@ def parse_history(past_guess_history_item):
 
     return guesses, feedbacks
 
+import re
+
+def consistency_reward_func(prompts, completions, **kwargs) -> list[float]:
+    """Rewards the model for respecting green (✓) and gray (x) feedback."""
+    rewards = []
+    
+    for prompt, completion in zip(prompts, completions):
+        reward = 0.0
+        # 1. Extract the model's guess
+        guess_match = re.search(r"<guess>(.*?)</guess>", completion, re.IGNORECASE)
+        if not guess_match:
+            rewards.append(0.0)
+            continue
+        
+        current_guess = guess_match.group(1).upper().strip()
+        
+        # 2. Extract feedback history from the prompt
+        # We look for patterns like 'CASTE: C(✓) A(x) S(-) T(x) E(-)'
+        history = re.findall(r"([A-Z]{5}):\s*([A-Z\(✓\-x\)\s]+)", prompt)
+        
+        for past_word, feedback in history:
+            # Parse feedback (e.g., ['C(✓)', 'A(x)', ...])
+            fb_list = re.findall(r"[A-Z]\([✓\-x]\)", feedback)
+            
+            for i, fb in enumerate(fb_list):
+                letter = fb[0]
+                status = fb[2] # The symbol inside the ()
+                
+                # RULE: If a letter was Gray (x), it shouldn't be in the new guess
+                if status == 'x' and letter in current_guess:
+                    reward -= 0.5  # Penalty for using a dead letter
+                
+                # RULE: If a letter was Green (✓), it MUST stay in that spot
+                if status == '✓' and current_guess[i] != letter:
+                    reward -= 1.0  # Heavy penalty for moving a green letter
+                    
+        rewards.append(reward)
+    return rewards
+
+def repetition_reward_func(prompts, completions, **kwargs) -> list[float]:
+    """Penalizes the model for guessing a word it has already tried."""
+    rewards = []
+    for prompt, completion in zip(prompts, completions):
+        guess_match = re.search(r"<guess>(.*?)</guess>", completion, re.IGNORECASE)
+        if not guess_match:
+            rewards.append(0.0)
+            continue
+            
+        current_guess = guess_match.group(1).upper().strip()
+        past_guesses = re.findall(r"([A-Z]{5}):", prompt)
+        
+        if current_guess in past_guesses:
+            rewards.append(-2.0) # Strong penalty for repeating a guess
+        else:
+            rewards.append(0.5)  # Bonus for being original
+    return rewards
 
 def letters_constraints_from_history(guesses, feedbacks):
     """
@@ -217,7 +273,7 @@ def wordle_reward_func(completions, prompts, secret_word, past_guess_history=Non
     
     # Constants for tuning
     INVALID_PENALTY = -2.0
-    REPEAT_PENALTY = -3.0
+    REPEAT_PENALTY = -5.0
     CONSTRAINT_VIOLATION_PENALTY = -1.5
     EXACT_BONUS = 20.0
 
@@ -242,17 +298,27 @@ def wordle_reward_func(completions, prompts, secret_word, past_guess_history=Non
 
         # 4. Anti-Repetition Check
         if guess in guesses_hist:
-            score += REPEAT_PENALTY
+            count=guesses_hist.count(guess)
+            score += REPEAT_PENALTY*count
+        
+        # Reward exploration: bonus for every letter never tried before in this game
+        all_past_letters = set("".join(guesses_hist))
+        new_letters = set(guess) - all_past_letters
+        
+        # We only give the bonus if there actually IS a history to compare against
+        if guesses_hist:
+            score += len(new_letters) * 0.2
 
         # 5. Logic/Constraint Check (The "Brain" part)
         if guesses_hist and feedbacks_hist:
             greens, yellows, dead = letters_constraints_from_history(guesses_hist, feedbacks_hist)
-            
+
             violation = False
+            
             # Check Greens: Must have the letter in the known position
             for pos, letter in greens.items():
                 if guess[pos] != letter: 
-                    violation = True
+                    violation= True
             
             # Check Dead: Must not use letters known to be absent
             for letter in guess:
@@ -262,7 +328,7 @@ def wordle_reward_func(completions, prompts, secret_word, past_guess_history=Non
             # Check Yellows: Must include the letter somewhere
             for letter in yellows:
                 if letter not in guess: 
-                    violation = True
+                    violation= True
 
             if violation:
                 score += CONSTRAINT_VIOLATION_PENALTY

@@ -219,7 +219,7 @@ def setup_model_and_tokenizer_peft():
         MODEL_NAME,
         torch_dtype=torch.bfloat16,    # Native 16-bit
         device_map="auto",
-        attn_implementation="flash_attention_2" # 4090 loves this
+        attn_implementation="sdpa" # 4090 loves this
     )
     
     # Standard LoRA Setup
@@ -250,7 +250,12 @@ def run_train(train_dataset, val_dataset):
 
     training_args = GRPOConfig(
         output_dir="output_4090/wordle-grpo",
-        
+
+        # --- Time Control ---
+        max_steps=150,
+        logging_steps=1,
+
+
         # --- 4090 VRAM Sweet Spot ---
         per_device_train_batch_size=2,    # Small train batch
         num_generations=16,               # High generation count for better RL
@@ -266,12 +271,12 @@ def run_train(train_dataset, val_dataset):
         beta=0.04,                        # KL penalty to keep reasoning coherent
         
         # --- Reasoning Depth ---
-        max_prompt_length=512,
+        max_prompt_length=256,
         max_completion_length=512,        # 512 tokens allows for very deep thinking tags
         
         # --- Cluster Safety ---
         save_strategy="steps",
-        save_steps=2,
+        save_steps=100,
         save_total_limit=2,
         report_to="none",                 # Use "none" unless you've verified internet
     )

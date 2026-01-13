@@ -2,9 +2,20 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import pandas as pd
 import random
+from prompt_templates import create_wordle_prompt
+import re
+import os
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
-# --- CONFIG ---
-MODEL_PATH = "./output5/wordle-grpo-rtx4070/final_model" 
+# 1. Use the absolute path
+RELATIVE_PATH = "~/nlp_m4_grpo/output_4090/wordle-grpo/final_model"
+MODEL_PATH = os.path.expanduser(RELATIVE_PATH)
+
+# 2. Verify the directory exists
+if not os.path.isdir(MODEL_PATH):
+    raise FileNotFoundError(f"Could not find directory: {MODEL_PATH}")
+
+print(f"Loading tokenizer from local path: {MODEL_PATH}")
 WORD_LIST_PATH = "five_letter_words.csv"
 NUM_GAMES = 10
 
@@ -27,32 +38,57 @@ test_words = random.sample(words, NUM_GAMES)
 
 for word in test_words:
     history = []
+    past_guesses = []  # To store (guess, feedback) tuples
     success = False
+    
     print(f"\nTARGET: {word}")
+    
     for i in range(1, 7):
-        prompt = f"""<|system|>
-        You are a strategic Wordle solver. You use your <think> block to:
-        1. List letters that are confirmed (Green) or misplaced (Yellow).
-        2. List letters that are eliminated (Gray).
-        3. Cross-reference new candidates against all previous feedback.
-        4. Output only a valid 5-letter word in the <answer> tags.
-        <|user|>
-        History: {history}
-        Target is a 5-letter word. Think carefully and guess.
-        """
+        # 2. Use the new function to build the prompt dynamically
+        # It handles the System prompt, Few-shot examples, and History all in one
+        prompt = create_wordle_prompt(
+            past_guesses=past_guesses,
+            use_few_shot=True,
+            num_examples=2
+        )
+
         inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
         
-        # Restricted to 128 because the 4070 model wasn't trained for long thoughts
-        out = model.generate(**inputs, max_new_tokens=128, do_sample=False)
-        resp = tokenizer.decode(out[0], skip_special_tokens=True)
+        # 3. Generate response
+        out = model.generate(**inputs, max_new_tokens=512, do_sample=False)
         
-        # Old model might not have used tags well, so we take the last 5-letter word
-        guess = resp.split()[-1].strip().upper()[:5]
+        # --- FIX STARTS HERE ---
+        # Slice 'out' to only include tokens AFTER the input prompt
+        prompt_length = inputs.input_ids.shape[1]
+        new_tokens = out[0][prompt_length:]
         
+        # Decode only the newly generated tokens
+        resp = tokenizer.decode(new_tokens, skip_special_tokens=True)
+        
+        # Since your create_wordle_prompt ends with "<think>", 
+        # the model's 'new_tokens' start immediately after it.
+        # We prepend it back so the regex/print looks correct.
+        full_resp = "<think>" + resp
+        # --- FIX ENDS HERE ---
+
+        print(f"\n--- RAW MODEL OUTPUT (Step {i}) ---\n{full_resp}\n{'-'*40}")
+        
+        # 4. Extraction logic (Using the filtered response)
+        # Use full_resp here to ensure tags are present
+        guess_match = re.search(r"<guess>(.*?)</guess>", full_resp, re.IGNORECASE)
+        guess = guess_match.group(1).strip().upper() if guess_match else "ERROR"
+        
+        # Sanitize
+        guess = re.sub(r'[^A-Z]', '', guess)[:5]
+
         feedback = get_feedback(guess, word)
+
         print(f"Step {i}: {guess} -> {feedback}")
-        history.append(f"{guess}:{feedback}")
+        
+        # Update past_guesses for the next turn in the loop
+        past_guesses.append((guess, feedback))
         
         if guess == word:
             success = True; break
+
     print("RESULT: " + ("WIN" if success else "LOSE"))
