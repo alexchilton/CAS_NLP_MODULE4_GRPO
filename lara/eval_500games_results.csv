@@ -1,0 +1,6 @@
+model_name,path,n_games,solve_rate,avg_turns_solved,avg_turns_with_fail_as_7,parse_fail_rate_per_turn,oov_rate_per_turn,repeat_rate_per_turn,avg_log_candidate_reduction,avg_frac_candidate_reduction,traces_saved_to
+only grpo,./output_4090/wordle-grpo/final_model,500,0.0,,7.0,0.0006666666666666666,0.794,0.35533333333333333,2.7317799840338832,0.8071244469658595,traces/only_grpo.jsonl
+only sft,./qwen2.5-3b-wordle-sft/final_adapter,500,0.0,,7.0,0.0,0.04033333333333333,0.5243333333333333,1.2654766369766641,0.3858078710862465,traces/only_sft.jsonl
+sft_teacher,./qwen-wordle-sft-teacher/final_adapter,500,0.014,4.0,6.958,0.0,0.43366666666666664,0.09066666666666667,2.214199827846798,0.6635532655960699,traces/sft_teacher.jsonl
+sft_teacher_masked,./qwen-wordle-sft-teacher-masked/final_adapter,500,0.19,4.810526315789474,6.584,0.0006666666666666666,0.4056666666666667,0.018,2.1641554788258737,0.6634073215866739,traces/sft_teacher_masked.jsonl
+grpo on sft_masked_teach,./qwen-wordle-grpo/final_adapter,500,0.014,4.0,6.958,0.0,0.43366666666666664,0.09066666666666667,2.214199827846798,0.6635532655960699,traces/grpo_on_sft_masked_teach.jsonl
