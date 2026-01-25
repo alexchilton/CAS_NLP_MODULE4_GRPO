@@ -41,6 +41,11 @@ checkpoints/
 trainer_state.json
 *.pt
 
+# Datasets
+
+**.jsonl
+*.jsonl
+
 # Model files (too large)
 *.pth
 *.ckpt
