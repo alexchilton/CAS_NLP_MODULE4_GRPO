@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title>scientific_failure_presentation_v2</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^5/dist/reset.css">
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^5/dist/reveal.css">
+  <style>
+    .reveal .sourceCode {  /* see #7635 */
+      overflow: visible;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  /* ---- FIX: prevent slides from being clipped ---- */
+  .reveal .slides section,
+  .reveal .slides section > section {
+    overflow: visible !important;
+  }
+
+  .reveal .slides {
+    overflow: visible !important;
+  }
+  /* ===== Responsive typography for reveal.js (auto-scales with screen) ===== */
+  :root{
+    /* Base font size scales with viewport; tweak numbers if needed */
+    --reveal-base: clamp(18px, 2.2vw, 34px);
+    --reveal-h1:   clamp(34px, 4.2vw, 72px);
+    --reveal-h2:   clamp(28px, 3.2vw, 56px);
+    --reveal-h3:   clamp(22px, 2.6vw, 42px);
+    --reveal-code: clamp(12px, 1.4vw, 20px);
+  }
+
+  .reveal { font-size: var(--reveal-base) !important; line-height: 1.25; }
+  .reveal h1 { font-size: var(--reveal-h1) !important; }
+  .reveal h2 { font-size: var(--reveal-h2) !important; }
+  .reveal h3 { font-size: var(--reveal-h3) !important; }
+  .reveal pre, .reveal code { font-size: var(--reveal-code) !important; }
+
+  /* ===== Fix: graphics must fit inside a Reveal slide ===== */
+
+  /* Make common “graphics” elements responsive */
+  .reveal section img,
+  .reveal section svg,
+  .reveal section canvas,
+  .reveal section video,
+  .reveal section iframe {
+    max-width: 100% !important;
+    max-height: 65vh !important;   /* key line: prevents vertical cut */
+    height: auto !important;
+    width: auto !important;
+  }
+
+  /* If you have big chart containers made of divs */
+  .reveal section .chart,
+  .reveal section .viz,
+  .reveal section .figure,
+  .reveal section .graphic {
+    max-height: 65vh !important;
+  }
+
+  /* Prevent accidental clipping */
+  .reveal .slides section {
+    overflow: visible !important;
+  }
+  /* Shrink dense graphic slides slightly */
+  .reveal section.graphic-slide {
+    font-size: 0.78em;   /* only affects that slide */
+  }
+  /* Shrink text-heavy slides slightly */
+  .reveal section.dense {
+    font-size: 0.85em;
+    line-height: 1.15;
+  }
+
+  /* Extra shrink for extremely dense slides */
+  .reveal section.dense2 {
+    font-size: 0.78em;
+    line-height: 1.12;
+  }
+
+  /* Reduce default paragraph/list spacing on dense slides */
+  .reveal section.dense p { margin: 0.3em 0; }
+  .reveal section.dense ul,
+  .reveal section.dense ol { margin: 0.35em 0; }
+  .reveal section.dense li { margin: 0.15em 0; }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/reveal.js@^5/dist/theme/moon.css" id="theme">
+  <link rel="stylesheet" href="slides_style.css"/>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+
+<section>
+<section id="the-goldilocks-failure-of-rl-training"
+class="title-slide slide level1">
+<h1>The Goldilocks Failure of RL Training</h1>
+
+</section>
+<section id="how-grpo-failed-across-three-orders-of-magnitude"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">How GRPO Failed Across Three Orders of
+Magnitude</h2>
+<!-- 
+SOURCE FILES:
+- Simple Prompt: transformer_grpo/wordle-grpo/src/data/prompt_templates.py
+- Structured Prompt: expert_guy/post_training_project/threestage/test_base_model_structured_prompts/prompt_system.py
+-->
+</section>
+<section id="slide-1-the-xml-strategy-why-think"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 1: The XML Strategy (Why
+<code>&lt;think&gt;</code>?)</h2>
+<p><strong>The Goal:</strong> Chain-of-Thought (CoT) Reasoning.</p>
+<p>We didn’t just want the model to output a word. We wanted it to
+<strong>plan</strong>. By enforcing a strict XML schema, we attempted to
+separate the “reasoning space” from the “action space”.</p>
+<p><strong>The Intended Flow:</strong> 1.
+<strong><code>&lt;think&gt;</code> block:</strong> The “scratchpad.” The
+model talks to itself, eliminates letters, and checks constraints. 2.
+<strong><code>&lt;guess&gt;</code> block:</strong> The final action.
+This is the only part the game engine sees.</p>
+<p><strong>Why this backfired:</strong> The model learned the
+<em>syntax</em> of thinking (the tags) but not the <em>semantics</em>
+(the logic). In the Gemma failure mode, the <code>&lt;think&gt;</code>
+tag itself became a “high-reward token,” leading to the infinite
+generation loop.</p>
+</section>
+<section id="slide-2-sft-data-format-teaching-the-rules"
+class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Slide 2: SFT Data Format (Teaching the
+Rules)</h2>
+<p><strong>Phase 1: Supervised Fine-Tuning</strong> We used the
+Predibase Wordle-SFT dataset with expert demonstrations.</p>
+<p><strong>Structure:</strong> * <strong>Prompt:</strong> System
+instructions + game rules + examples + “Make your guess” *
+<strong>Completion:</strong> Detailed reasoning in
+<code>&lt;think&gt;</code> tags + guess in <code>&lt;guess&gt;</code>
+tags</p>
+<p><strong>Sample (<code>predibase/wordle-sft</code>):</strong></p>
+<pre><code>Prompt: &quot;You are playing Wordle... [detailed rules]...
+Make your first 5-letter word guess.&quot;
+
+Completion: &quot;&lt;think&gt;This is my first guess. Good first 
+words include common letters like E, A, R, T, S...
+I&#39;ll choose CRANE with common letters...&lt;/think&gt;
+&lt;guess&gt;CRANE&lt;/guess&gt;&quot;</code></pre>
+<p><strong>The Problem:</strong> Full examples often exceeded
+<strong>4000+ tokens</strong>, but our models were configured for
+<strong>512 tokens max</strong>—meaning the <code>&lt;guess&gt;</code>
+tag was frequently cut off during training.</p>
+<p><em>Note: This context mismatch became a critical failure
+point.</em></p>
+</section>
+<section id="slide-3-grpo-data-format-the-test"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 3: GRPO Data Format (The Test)</h2>
+<p><strong>Phase 2: Group Relative Policy Optimization</strong> In RL,
+we remove the training wheels. We give the model the
+<strong>Prompt</strong> but NO <strong>Completion</strong>.</p>
+<p><strong>Structure:</strong> * <strong>Prompt Only:</strong> “Here is
+the game state. What do you do?” * <strong>Generation:</strong> The
+model generates <span class="math inline"><em>N</em></span> different
+responses (the “Group”). * <strong>Scoring:</strong> We grade each
+response based on rules (Valid XML? Valid word? Good strategy?) and
+update the policy to favor the winners.</p>
+<p><strong>Sample (<code>predibase/wordle-grpo</code>):</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># From grpo_local_data.py</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;prompt&#39;</span>: [</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">&quot;You are playing Wordle...</span><span class="ch">\n</span><span class="st">Make a new 5-letter word guess.</span><span class="ch">\n</span><span class="st">Let me solve this step by step.</span><span class="ch">\n</span><span class="st">&lt;think&gt;&quot;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;secret_word&#39;</span>: [<span class="st">&quot;CRANE&quot;</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p><em>Crucially, the ‘completion’ column is gone. The model must invent
+the reasoning itself.</em></p>
+</section>
+<section id="slide-4-two-prompting-philosophies"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 4: Two Prompting Philosophies</h2>
+<h3 id="different-approaches-same-failures">“Different Approaches, Same
+Failures”</h3>
+<p>We didn’t just test different models—we tested <strong>two distinct
+prompting strategies</strong> to see if better instruction design could
+prevent failure.</p>
+<p><strong>Approach 1: Simple Prompt with Few-Shot Examples</strong>
+<em>(Used for GPT-2 and early experiments)</em></p>
+<pre><code>You are playing Wordle. Guess a 5-letter word.
+
+### IMPORTANT - Response Format:
+You MUST respond in this exact format:
+&lt;think&gt;your reasoning here&lt;/think&gt;
+&lt;guess&gt;WORD&lt;/guess&gt;
+
+### Example:
+&lt;think&gt;I&#39;ll try CRANE as a starting word with good coverage.&lt;/think&gt;
+&lt;guess&gt;CRANE&lt;/guess&gt;</code></pre>
+<p><strong>Key Features:</strong> Direct instructions, minimal context,
+learning by example.</p>
+</section>
+<section class="slide level2">
+
+<p><strong>Approach 2: Structured Prompt with State Tracking</strong>
+<em>(Used for Qwen 2.5-3B and Gemma 3 4B)</em></p>
+<pre><code>You are an expert Wordle-solving AI. Your primary directive is to 
+deduce the secret 5-letter English word with flawless logic and strategy.
+
+### Core Principles
+1. Deductive Reasoning: Analyze all available clues...
+2. Strategic Guessing: In early turns, maximize information...
+3. Self-Correction &amp; Rule Adherence: Before finalizing a guess...
+
+You are playing a game of Wordle. Analyze the clues:
+**Current Knowledge:**
+*   **Correct Position (Green):** `A _ _ _ _`
+*   **Wrong Position (Yellow):** &#39;O&#39;, &#39;R&#39;, &#39;T&#39;, &#39;U&#39;
+*   **Not in Word (Gray):** B, E, I, S
+*   **Words Already Guessed:** ARISE, ABOUT</code></pre>
+<p><strong>Key Features:</strong> Explicit state representation,
+“expert” framing, detailed reasoning requirements.</p>
+</section>
+<section class="slide level2">
+
+<p><strong>The Result:</strong> Despite the more sophisticated prompt
+engineering in Approach 2, <strong>all models still failed</strong>.
+Better prompts couldn’t overcome fundamental capacity limitations or
+reward hacking.</p>
+</section>
+<section id="slide-5-wordle-grpo-system-architecture"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 5: Wordle GRPO System
+Architecture</h2>
+<p><strong>Training Flow:</strong></p>
+<pre><code>   Dataset
+      ↓
+ GRPO Trainer → Checkpoint
+      ↓            (LoRA)
+   Model
+ (Qwen 2.5-3B)
+      ↓
+ Generation
+      ↓
+Reward Function
+(Format+Feedback
+    +Value)</code></pre>
+<p><strong>Evaluation Flow:</strong></p>
+<pre><code>  Checkpoint
+      ↓
+  Evaluator
+ (Play games)
+      ↓
+   Metrics
+ (Win rate)</code></pre>
+</section>
+<section id="slide-6-the-context-length-problem"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 6: The Context Length Problem</h2>
+<h3 id="when-the-answer-is-out-of-reach">“When the Answer is Out of
+Reach”</h3>
+<p><strong>The Problem:</strong> During SFT, the model needs to learn
+the complete format:
+<code>&lt;think&gt;reasoning...&lt;/think&gt;&lt;guess&gt;WORD&lt;/guess&gt;</code>.
+But the <code>&lt;guess&gt;</code> tag often appears <strong>after the
+context cutoff</strong>.</p>
+<p><strong>The Numbers:</strong> - Target context: <strong>512
+tokens</strong> - Actual SFT examples: Often <strong>4000+
+tokens</strong> - The <code>&lt;guess&gt;</code> tag location: Sometimes
+at token 3500+</p>
+<p><strong>Why Chunking Doesn’t Work:</strong> You can’t simply split
+the training data. The model must see the <em>entire</em> reasoning
+chain ending with the <code>&lt;guess&gt;</code> tag to learn the
+format. Chunking would create incomplete examples where the model never
+learns to close the loop.</p>
+<p><strong>The Consequence:</strong> The model learns to reason but not
+to <em>conclude</em>. It enters the “think loop” because it was never
+consistently trained on examples where thinking <strong>ends</strong>
+and guessing <strong>begins</strong>.</p>
+</section>
+<section id="slide-6-the-temperature-catastrophe"
+class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Slide 6: The Temperature Catastrophe</h2>
+<h3 id="same-model-different-universe">“Same Model, Different
+Universe”</h3>
+<p><strong>The Discovery:</strong> Gemma 3 4B exhibited completely
+different behavior based on generation temperature.</p>
+<p><strong>Temperature 0.7 (Higher Randomness):</strong> - Excessive
+reasoning - didn’t know when to stop - Hallucinated extra feedback and
+guesses - Made up game states that didn’t exist - ~0% win rate</p>
+<p><strong>Temperature 0.3 (Lower Randomness):</strong> - Coherent
+gameplay - Valid guesses - Measurable strategic improvement</p>
+<p><strong>Key Insight:</strong> <strong>Temperature is a hidden
+hyperparameter in RL stability.</strong> Higher temperatures amplify the
+policy’s uncertainty, making it more susceptible to reward hacking and
+mode collapse. The same model can be “broken” or “functional” based
+solely on this sampling parameter.</p>
+<p><strong>The Implication:</strong> This suggests the GRPO-trained
+policy was on a knife’s edge—barely stable even in the best case.</p>
+</section>
+<section id="slide-7-the-small-model-gpt-2"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 7: The Small Model (GPT-2)</h2>
+<h3 id="too-small-to-listen">“Too Small to Listen”</h3>
+<p><strong>Hypothesis:</strong> “Maybe a small model can learn the rules
+if we prompt it clearly.”</p>
+<p><strong>The Narrative:</strong> We started with a lightweight model,
+hoping Reinforcement Learning could bridge the gap. We provided strict
+XML formatting instructions.</p>
+<p><strong>The Failure:</strong> The model was functionally “too weak”
+to even adhere to the syntax. Instead of playing the game, it treated
+the system prompt as a conversation to be continued or simply
+hallucinated the instructions back to the user.</p>
+<p><strong>Key Insight:</strong> <strong>RL cannot fix what SFT didn’t
+teach.</strong> Without a baseline capability for instruction following,
+the reward signal is noise.</p>
+</section>
+<section id="slide-8-evidence---gpt-2-hallucinations"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 8: Evidence - GPT-2
+Hallucinations</h2>
+<p><strong>Source:</strong>
+<code>transformer_grpo/wordle-grpo/game_log.txt</code></p>
+<p>The model sees the example “YOUR_GUESS” in the prompt and blindly
+copies it, while also failing the 5-letter constraint completely.</p>
+<pre class="text"><code>user
+Make your first 5-letter word guess.
+
+assistant
+I&#39;ll start with &quot;CATS&quot;. I think it&#39;s likely that my first guess would be something simple and common.
+
+Model&#39;s Guess: YOUR_GUESS  &lt;-- Hallucinated placeholder
+Feedback: Invalid guess: must be a 5-letter word.</code></pre>
+</section>
+<section id="slide-9-the-medium-model-qwen-2.5-3b"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 9: The Medium Model (Qwen
+2.5-3B)</h2>
+<h3 id="the-reward-hacker">“The Reward Hacker”</h3>
+<p><strong>Hypothesis:</strong> “A modern instruction-following model
+(Qwen) will understand the rules and actually play.”</p>
+<p><strong>The Narrative:</strong> Qwen 2.5-3B-Instruct solved the
+syntax problem. It achieved <strong>100% XML compliance</strong>. It
+never crashed the parser.</p>
+<p><strong>The Failure:</strong> It found a local minimum in the reward
+landscape. The model was confused by the requirement to output a
+<code>&lt;think&gt;</code> tag and a guess. It eventually decided that
+the word <strong>“THINK”</strong> itself was the safest, most valid
+guess it could make.</p>
+<p><strong>Key Insight:</strong> <strong>Optimization without
+comprehension.</strong> The model learned “If I say ‘THINK’, I don’t get
+punished for syntax errors,” but it failed to learn the objective of the
+game.</p>
+</section>
+<section id="slide-10-evidence---the-think-loop"
+class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Slide 10: Evidence - The “THINK” Loop</h2>
+<p><strong>Source:</strong>
+<code>transformer_grpo/wordle-grpo/evaluation_results/transcripts_20251026_070527.json</code></p>
+<p>The model abandons strategy and defaults to guessing the word “THINK”
+repeatedly, burning through its attempts.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;secret_word&quot;</span><span class="fu">:</span> <span class="st">&quot;CLAUT&quot;</span><span class="fu">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;guesses&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;THINK&quot;</span><span class="ot">,</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;SHOUT&quot;</span><span class="ot">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;ENLIT&quot;</span><span class="ot">,</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;FIERE&quot;</span><span class="ot">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;IDIOM&quot;</span><span class="ot">,</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;PACED&quot;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;feedbacks&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;T(-) H(x) I(x) N(x) K(x)&quot;</span><span class="ot">,</span>  <span class="er">//</span> <span class="er">Guess</span> <span class="dv">1</span><span class="er">:</span> <span class="er">THINK</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;S(x) H(x) O(x) U(Y) T(Y)&quot;</span><span class="ot">,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;E(x) N(x) L(-) I(x) T(Y)&quot;</span><span class="ot">,</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;F(x) I(x) E(x) R(x) E(x)&quot;</span><span class="ot">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;I(x) D(x) I(x) O(x) M(x)&quot;</span><span class="ot">,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;P(x) A(-) C(-) E(x) D(x)&quot;</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;won&quot;</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p><em>(In other runs, it guessed “THINK” 6 times in a row.)</em></p>
+</section>
+<section id="slide-11-the-large-model-gemma-3-4b"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 11: The Large Model (Gemma 3 4B)</h2>
+<h3 id="model-collapse">“Model Collapse”</h3>
+<p><strong>Hypothesis:</strong> “A powerful, SFT-trained model (Gemma 3)
+will finally have the capacity to leverage GRPO for reasoning.”</p>
+<p><strong>The Narrative:</strong> We started with a strong baseline.
+The SFT model played Wordle competently (~10% win rate). We applied GRPO
+to encourage “thinking” before guessing.</p>
+<p><strong>The Failure:</strong> <strong>Catastrophic Model
+Collapse.</strong> The model learned that the <code>&lt;think&gt;</code>
+tag was associated with high rewards (reasoning steps). The optimization
+pressure pushed it to maximize this signal, resulting in an infinite
+loop of generating the tag.</p>
+<p><strong>Key Insight:</strong> <strong>The “Think Loop”.</strong>
+Stronger models are more prone to overfitting on specific stylistic
+tokens if the KL divergence penalty isn’t perfectly tuned. It maximized
+the <em>appearance</em> of thinking but lost the ability to stop.</p>
+</section>
+<section id="slide-12-evidence---the-infinite-loop"
+class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Slide 12: Evidence - The Infinite Loop</h2>
+<p><strong>Source:</strong>
+<code>expert_guy/post_training_project/outputs/case.log</code></p>
+<p>The model enters a degenerate state where it can only output the
+<code>&lt;think&gt;</code> token until the context window is
+exhausted.</p>
+<pre class="text"><code>&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;think&gt;
+&lt;
+2025-12-23 14:55:32,188 - INFO - Reward: 0.0
+2025-12-23 14:55:32,188 - INFO - Secret: ABHOR</code></pre>
+</section>
+<section class="slide level2 graphic-slide">
+  <h2 style="margin:0 0 8px 0;">500-Game Wordle Benchmark (Same 500 targets, deterministic decoding)</h2>
+
+  <div style="font-size:0.82em; display:grid; grid-template-columns: 1.05fr 0.95fr; gap:14px; align-items:start;">
+
+    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
+      <h3 style="margin:0 0 8px 0;">Headline results</h3>
+
+      <ul style="margin:0; padding-left:18px; line-height:1.35;">
+        <li><b>Best overall:</b>
+          <span style="padding:2px 8px; border-radius:999px; background:#eef; border:1px solid #ccd;">
+            SFT Teacher (masked)</span>
+          — <b>19% solve rate</b> (avg <b>4.81</b> turns when solved)
+        </li>
+        <li><b>Teacher helps:</b> SFT teacher (unmasked) reaches <b>1.4%</b> solve rate, but has high OOV guesses.</li>
+        <li><b>GRPO breaks validity:</b> “only GRPO” hits <b>0%</b> solve rate with <b>~79% OOV</b> guesses.</li>
+        <li><b>GRPO after masked SFT regresses:</b> solve rate drops back to <b>1.4%</b>.</li>
+      </ul>
+
+      <div style="margin-top:10px; padding:10px; border-radius:12px; background:#fafafa; border:1px solid #eee;">
+        <div style="font-weight:600; margin-bottom:6px;">Interpretation</div>
+        <div style="line-height:1.3;">
+          Masked teacher SFT yields the best trade-off between <b>strategy</b> (candidate reduction)
+          and <b>valid actions</b>. GRPO increases information-seeking but can <b>destroy vocabulary discipline</b>.
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
+      <h3 style="margin:0 0 10px 0;">Key metrics (per model)</h3>
+
+      <div style="font-weight:600; margin:8px 0 6px;">Solve rate (↑ better)</div>
+
+      <div style="display:grid; gap:6px;">
+        <div style="display:grid; grid-template-columns: 150px 1fr 52px; align-items:center; gap:8px;">
+          <div>only GRPO</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:0%; background:#999;"></div>
+          </div>
+          <div style="text-align:right;">0.0%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 52px; align-items:center; gap:8px;">
+          <div>only SFT</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:0%; background:#999;"></div>
+          </div>
+          <div style="text-align:right;">0.0%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 52px; align-items:center; gap:8px;">
+          <div>SFT teacher</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:7.4%; background:#6aa;"></div>
+          </div>
+          <div style="text-align:right;">1.4%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 52px; align-items:center; gap:8px;">
+          <div><b>SFT teacher (masked)</b></div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:100%; background:#4a8;"></div>
+          </div>
+          <div style="text-align:right;"><b>19%</b></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 52px; align-items:center; gap:8px;">
+          <div>GRPO on masked</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:7.4%; background:#6aa;"></div>
+          </div>
+          <div style="text-align:right;">1.4%</div>
+        </div>
+      </div>
+
+      <div style="font-weight:600; margin:12px 0 6px;">OOV rate / turn (↓ better)</div>
+
+      <div style="display:grid; gap:6px;">
+        <div style="display:grid; grid-template-columns: 150px 1fr 66px; align-items:center; gap:8px;">
+          <div>only GRPO</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:100%; background:#d77;"></div>
+          </div>
+          <div style="text-align:right;">79.4%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 66px; align-items:center; gap:8px;">
+          <div>only SFT</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:5.1%; background:#d77;"></div>
+          </div>
+          <div style="text-align:right;">4.0%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 66px; align-items:center; gap:8px;">
+          <div>SFT teacher</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:54.6%; background:#d77;"></div>
+          </div>
+          <div style="text-align:right;">43.4%</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 66px; align-items:center; gap:8px;">
+          <div><b>SFT masked</b></div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:51.1%; background:#d77;"></div>
+          </div>
+          <div style="text-align:right;"><b>40.6%</b></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 150px 1fr 66px; align-items:center; gap:8px;">
+          <div>GRPO on masked</div>
+          <div style="height:12px; background:#f3f3f3; border-radius:999px; overflow:hidden; border:1px solid #eee;">
+            <div style="height:100%; width:54.6%; background:#d77;"></div>
+          </div>
+          <div style="text-align:right;">43.4%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:10px; font-size:0.9em; color:#555;">
+        Notes: parse-fail ≈ 0% (format-agnostic extractor). Same 500 targets for all models.
+      </div>
+    </div>
+  </div>
+</section>
+<section id="slide-13-conclusion-the-failure-surface"
+class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Slide 13: Conclusion &amp; The Failure
+Surface</h2>
+<p><strong>Summary of Findings:</strong> We successfully mapped the
+<strong>“Failure Surface”</strong> of GRPO training across three
+distinct regimes:</p>
+<ol type="1">
+<li><strong>Format Failure (GPT-2):</strong> Model too small/weak to
+follow instructions.</li>
+<li><strong>Objective Failure (Qwen):</strong> Reward hacking
+(optimizing for safety over winning).</li>
+<li><strong>Optimization Failure (Gemma):</strong> Model collapse
+(overfitting to specific tokens).</li>
+</ol>
+<p><strong>Final Takeaway:</strong> These failures reveal
+<strong>critical prerequisites for GRPO success</strong>:</p>
+<ol type="1">
+<li><strong>Data quality matters</strong> - Context length mismatches
+(512 vs 4000+ tokens) broke SFT, creating an unstable foundation for
+GRPO.</li>
+<li><strong>Hyperparameters are critical</strong> -
+<code>num_generations=2</code> caused 75% of training steps to be
+skipped. Proper GRPO likely requires 8+ generations.</li>
+<li><strong>Compute constraints are real</strong> - Limited batch sizes,
+epochs, and hardware prevented proper ablation studies and
+hyperparameter tuning.</li>
+</ol>
+</section>
+<section id="slide-13-conclusion-the-failure-surface"
+class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Slide 13: Conclusion &amp; The Failure
+Surface</h2>
+<p><strong>What we learned:</strong> GRPO didn’t fail because the
+algorithm is broken—it failed because the <strong>practical
+implementation requirements</strong> (clean data, sufficient compute,
+proper hyperparameters) weren’t met. The failure modes we documented are
+valuable <strong>warnings</strong> for future work, not evidence that
+GRPO can’t work for structured reasoning tasks.</p>
+</section></section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/reveal.js@^5/dist/reveal.js"></script>
+
+  <!-- reveal.js plugins -->
+  <script src="https://unpkg.com/reveal.js@^5/plugin/notes/notes.js"></script>
+  <script src="https://unpkg.com/reveal.js@^5/plugin/search/search.js"></script>
+  <script src="https://unpkg.com/reveal.js@^5/plugin/zoom/zoom.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+        width: 1280,
+        height: 720,
+        margin: 0.06,
+        minScale: 0.2,
+        maxScale: 2.5,
+        center: false,
+      
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: true,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'bottom-right',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: false,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'default',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: true,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'slide',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'fade',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // reveal.js plugins
+        plugins: [
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    </body>
+</html>
