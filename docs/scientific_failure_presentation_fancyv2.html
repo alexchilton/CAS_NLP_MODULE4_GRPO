@@ -382,7 +382,7 @@ policy was on a knife’s edge—barely stable even in the best case.</p>
 </section>
 <section id="slide-7-the-small-model-gpt-2"
 class="slide level2 allowframebreaks">
-<h2 class="allowframebreaks">The Small Model (GPT-2)</h2>
+<h2 class="allowframebreaks">The Small Model (GPT-2/Qwen 0.5B)</h2>
 <h3 id="too-small-to-listen">“Too Small to Listen”</h3>
 <p><strong>Hypothesis:</strong> “Maybe a small model can learn the rules
 if we prompt it clearly.”</p>
@@ -507,204 +507,143 @@ exhausted.</p>
 2025-12-23 14:55:32,188 - INFO - Reward: 0.0
 2025-12-23 14:55:32,188 - INFO - Secret: ABHOR</code></pre>
 </section>
-<section id="wordle-part-title" class="slide level2">
-  <h2>The stacked approach: (Qwen + Teacher + GRPO)</h2>
-  <p style="margin-top:0.6em;">
-    <b>baseline SFT</b> → <b>teacher-generated data</b> → <b>masked SFT (fix)</b> → <b>GRPO (RL)</b> → <b>deterministic evaluation</b>.
-  </p>
+<section id="slide-13b-stacked-training-approach" class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Stacked Training Approach</h2>
+
+<p><strong>Methodology:</strong> From the previous failures, we implemented a three-stage training pipeline.</p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 20px 0;">
+  <div style="padding: 12px; border: 2px solid #6a9; border-radius: 8px; background: #f0f8f4;">
+    <div style="font-weight: 600; margin-bottom: 8px; color: #2a5;">Stage 1: Heuristic Solver</div>
+    <div style="font-size: 0.9em; line-height: 1.3;">
+      Deterministic solver using:
+      <ul style="margin: 8px 0; padding-left: 18px;">
+        <li>Letter frequency analysis</li>
+        <li>Positional scoring</li>
+        <li>Constraint filtering</li>
+      </ul>
+      Generated <strong>50k game demonstrations</strong>
+      <div style="margin-top: 8px;"><code style="font-size: 0.85em;">heuristic_solver.py</code></div>
+    </div>
+  </div>
+
+  <div style="padding: 12px; border: 2px solid #69a; border-radius: 8px; background: #f0f4f8;">
+    <div style="font-weight: 600; margin-bottom: 8px; color: #25a;">Stage 2: Supervised Fine-Tuning</div>
+    <div style="font-size: 0.9em; line-height: 1.3;">
+      Fine-tune Qwen 2.5-3B on teacher trajectories in <strong>two variants</strong>:
+      <ul style="margin: 8px 0; padding-left: 18px;">
+        <li><strong>Full loss:</strong> Train on entire sequence</li>
+        <li><strong>Masked loss:</strong> Train only on completion tokens</li>
+      </ul>
+      <div style="margin-top: 8px;"><code style="font-size: 0.85em;">train_sft_optim.py</code></div>
+    </div>
+  </div>
+
+  <div style="padding: 12px; border: 2px solid #a69; border-radius: 8px; background: #f8f0f4;">
+    <div style="font-weight: 600; margin-bottom: 8px; color: #a25;">Stage 3: GRPO Optimization</div>
+    <div style="font-size: 0.9em; line-height: 1.3;">
+      Apply reinforcement learning to reward:
+      <ul style="margin: 8px 0; padding-left: 18px;">
+        <li>Candidate set reduction</li>
+        <li>Information gain</li>
+        <li>Valid word usage</li>
+      </ul>
+      <div style="margin-top: 8px;"><code style="font-size: 0.85em;">train_grpo_sft_teached.py</code></div>
+    </div>
+  </div>
+</div>
+
+<p><strong>Heuristic Solver Implementation:</strong></p>
+
+<div class="sourceCode" id="cb-heuristic"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb-heuristic-1"><a href="#cb-heuristic-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> pick_best_guess(candidates, allowed_words<span class="op">=</span><span class="va">None</span>, used<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb-heuristic-2"><a href="#cb-heuristic-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Score words by letter/position frequency in remaining candidates.</span></span>
+<span id="cb-heuristic-3"><a href="#cb-heuristic-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Sample from top-5 to create varied demonstrations.&quot;&quot;&quot;</span></span>
+<span id="cb-heuristic-4"><a href="#cb-heuristic-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb-heuristic-5"><a href="#cb-heuristic-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Positional + global frequency scoring</span></span>
+<span id="cb-heuristic-6"><a href="#cb-heuristic-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, ch <span class="kw">in</span> <span class="bu">enumerate</span>(word):</span>
+<span id="cb-heuristic-7"><a href="#cb-heuristic-7" aria-hidden="true" tabindex="-1"></a>        score <span class="op">+=</span> pos_counts[i][ch]</span>
+<span id="cb-heuristic-8"><a href="#cb-heuristic-8" aria-hidden="true" tabindex="-1"></a>    score <span class="op">+=</span> <span class="bu">sum</span>(global_counts[ch] <span class="cf">for</span> ch <span class="kw">in</span> <span class="bu">set</span>(word)) <span class="op">*</span> <span class="fl">0.5</span></span>
+<span id="cb-heuristic-9"><a href="#cb-heuristic-9" aria-hidden="true" tabindex="-1"></a>    score <span class="op">-=</span> (<span class="dv">5</span> <span class="op">-</span> <span class="bu">len</span>(<span class="bu">set</span>(word))) <span class="op">*</span> <span class="fl">2.0</span>  <span class="co"># duplicate penalty</span></span></code></pre></div>
+
+<p><strong>Data Preparation:</strong> Teacher trajectories reformatted to create prompt/completion pairs for both training variants.</p>
+
 </section>
-<section id="wordle-pipeline-steps" class="slide level2 allowframebreaks">
-  <h2 class="allowframebreaks">Training Pipeline (Ubelix)</h2>
+<section id="slide-14-the-masked-teacher-breakthrough" class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">The Masked Teacher Breakthrough</h2>
+<h3>"When Less Supervision Means More Learning"</h3>
 
-  <div style="display:grid; grid-template-columns: 1fr; gap:10px; margin-top:0.6em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>1) Baseline SFT:</b> Qwen2.5-3B + <code>willcb/V3-wordle</code> → initial Wordle adapter
-    </div>
+<p><strong>The Problem Recap:</strong> Our original teacher dataset had the model learning from <em>everything</em>—both the reasoning process AND the final guess. This created two issues:</p>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>2) Teacher data:</b> heuristic solver generates <b>50k games</b> as demonstrations
-    </div>
+<ol>
+<li><strong>Context length mismatch:</strong> Full examples (prompt + reasoning + guess) exceeded 4000+ tokens, but training was capped at 512 tokens.</li>
+<li><strong>Diluted signal:</strong> The model was being trained on verbose reasoning instead of learning to <em>map states to actions</em>.</li>
+</ol>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>3) SFT on teacher data:</b> fine-tune the step-1 adapter on teacher trajectories
-    </div>
+<p><strong>The Solution: Completion-Only Loss Masking</strong></p>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>4) Data fix:</b> convert raw trajectories → <code>{prompt, completion}</code> (chat-template + EOS)
-    </div>
+<p>We restructured the data using <code>run_utils.py</code> to separate prompt from completion, then trained with <code>completion_only_loss=True</code>:</p>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>5) Masked SFT:</b> completion-only loss on the fixed dataset 
-    </div>
+<div class="sourceCode" id="cb-mask"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb-mask-1"><a href="#cb-mask-1" aria-hidden="true" tabindex="-1"></a><span class="co"># run_utils.py - Creating masked training data</span></span>
+<span id="cb-mask-2"><a href="#cb-mask-2" aria-hidden="true" tabindex="-1"></a>messages <span class="op">=</span> [</span>
+<span id="cb-mask-3"><a href="#cb-mask-3" aria-hidden="true" tabindex="-1"></a>    {<span class="st">&quot;role&quot;</span>:<span class="st">&quot;system&quot;</span>, <span class="st">&quot;content&quot;</span>: ex[<span class="st">&quot;system&quot;</span>].strip()},</span>
+<span id="cb-mask-4"><a href="#cb-mask-4" aria-hidden="true" tabindex="-1"></a>    {<span class="st">&quot;role&quot;</span>:<span class="st">&quot;user&quot;</span>, <span class="st">&quot;content&quot;</span>: ex[<span class="st">&quot;user&quot;</span>].strip()},</span>
+<span id="cb-mask-5"><a href="#cb-mask-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb-mask-6"><a href="#cb-mask-6" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> tok.apply_chat_template(messages, add_generation_prompt<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb-mask-7"><a href="#cb-mask-7" aria-hidden="true" tabindex="-1"></a>completion <span class="op">=</span> ex[<span class="st">&quot;label&quot;</span>].strip() <span class="op">+</span> tok.eos_token</span></code></pre></div>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <b>6) GRPO:</b> apply RL on top of masked SFT to push strategy further
-    </div>
-  </div>
-</section>
-
-<section id="wordle-teacher-idea" class="slide level2 allowframebreaks">
-  <h2 class="allowframebreaks">Teacher Generation: Why a Heuristic Solver?</h2>
-
-  <p>
-    We needed a scalable source of “expert-like” trajectories without expensive RL exploration.
-    The teacher plays Wordle with strict rule consistency and produces labeled next guesses.
-  </p>
-
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:0.8em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Teacher loop</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>sample a target word</li>
-        <li>guess (starter or heuristic top-k)</li>
-        <li>compute Wordle feedback</li>
-        <li>filter candidates consistent with feedback</li>
-        <li>store <b>(system, user, label)</b> per turn</li>
-      </ul>
-    </div>
-
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Heuristic signal</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>scores by <b>letter frequency</b> + <b>position frequency</b></li>
-        <li>penalizes duplicates</li>
-        <li>uses stochastic top-k to diversify data</li>
-        <li>keeps hard constraints via candidate filtering</li>
-      </ul>
-    </div>
-  </div>
-</section>
-
-<section id="wordle-data-fix-slide" class="slide level2 allowframebreaks dense">
-  <h2 class="allowframebreaks">The Data Fix: Prompt/Completion + EOS</h2>
-
-  <p>
-    Performance was still weak after training directly on raw “text-like” trajectories.
-    So we rewrote the dataset into a format that supports <b>completion-only training</b>.
-  </p>
-
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:0.8em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Before</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.25;">
-        <li>raw rows contain system/user/label</li>
-        <li>often trained as a single sequence</li>
-        <li>model spends capacity modeling the prompt</li>
-      </ul>
-    </div>
-
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">After</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.25;">
-        <li><b>prompt</b> built with Qwen chat template</li>
-        <li><b>completion</b> is only the label + EOS</li>
-        <li>enables <b>completion_only_loss</b></li>
-      </ul>
-    </div>
-  </div>
-
-  <pre style="margin-top:12px;"><code>
-prompt = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-completion = label + tok.eos_token
-write({"prompt": prompt, "completion": completion})</code></pre>
-
-  <div style="margin-top:10px; padding:10px 12px; border-radius:12px; background:#fafafa; border:1px solid #eee;">
-    <b>Interpretation:</b> this turned SFT into “learn the action distribution”, not “learn the whole conversation”.
-  </div>
+<p><strong>Key Insight:</strong> By masking the prompt and only computing loss on the <code>&lt;guess&gt;WORD&lt;/guess&gt;</code> completion, the model learned to associate game states with valid actions, rather than memorizing verbose reasoning patterns.</p>
 </section>
 
-<section id="wordle-masked-sft" class="slide level2 allowframebreaks">
-  <h2 class="allowframebreaks">Masked SFT (Completion-Only Loss) </h2>
+<section id="slide-15-why-masking-worked" class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Why Masking Worked</h2>
+<h3>"Focused Learning > Diluted Imitation"</h3>
 
-  <p>
-    With the rewritten dataset, we trained with <b>completion_only_loss=True</b> and no packing.
-    This model (“SFT teacher masked”) became the strongest system in our benchmark.
-  </p>
+<p><strong>The Cognitive Load Problem:</strong></p>
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:0.8em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">What masking changes</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>loss ignores prompt tokens</li>
-        <li>gradient focuses on guess tokens</li>
-        <li>reduces prompt-echo / formatting drift</li>
-      </ul>
-    </div>
+<p>Unmasked training forced the model to simultaneously learn:</p>
+<ul>
+<li>XML formatting syntax</li>
+<li>Strategic reasoning patterns</li>
+<li>Valid vocabulary constraints</li>
+<li>State-to-action mapping</li>
+</ul>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Why it helps Wordle</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>Wordle success is dominated by “valid actions”</li>
-        <li>completion-only SFT directly optimizes the action head</li>
-        <li>better validity → strategy has room to matter</li>
-      </ul>
-    </div>
-  </div>
+<p><strong>Masking isolated the critical skill:</strong> Given a game state (prompt), what is the correct next word (completion)?</p>
+
+<p><strong>The Numbers Tell the Story:</strong></p>
+<ul>
+<li><strong>Unmasked SFT teacher:</strong> 1.4% solve rate, 43.4% OOV rate</li>
+<li><strong>Masked SFT teacher:</strong> 19% solve rate, 40.6% OOV rate</li>
+</ul>
+
+<p><strong>Critical Trade-off:</strong> Masking slightly increased OOV guesses initially (the model had less exposure to the vocabulary in context), but dramatically improved <em>strategic coherence</em>—the model learned when and how to guess, not just what to say.</p>
+
+<p><strong>Why GRPO Still Failed:</strong> Even on this solid foundation, GRPO regressed the model back to 1.4% solve rate. This suggests the RL optimization itself introduced instabilities that overwhelmed the SFT baseline.</p>
 </section>
+<section id="slide-16-the-grpo-regression-puzzle" class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">The GRPO Regression Puzzle</h2>
+<h3>"One Step Forward, Two Steps Back"</h3>
 
-<section id="wordle-grpo-attempt" class="slide level2 allowframebreaks">
-  <h2 class="allowframebreaks">GRPO: “Try to Push Strategy Further”</h2>
+<p><strong>The Setup:</strong> We started with our best model—the masked SFT teacher achieving 19% solve rate. GRPO was supposed to <em>refine</em> this baseline by rewarding information-seeking behavior and candidate reduction.</p>
 
-  <p>
-    We then applied <b>GRPO</b> using the Wordle environment as a reward function:
-    sample <b>G</b> completions, score them, and update the policy toward the best samples.
-  </p>
+<p><strong>The Outcome:</strong> GRPO training <em>destroyed</em> the baseline, dropping solve rate from 19% → 1.4%.</p>
 
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:0.8em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Reward pressures</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>parseability + in-vocab</li>
-        <li>constraint consistency</li>
-        <li>candidate reduction / info gain</li>
-        <li>solve bonus</li>
-      </ul>
-    </div>
+<p><strong>Evidence from the Traces:</strong></p>
 
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">But RL can destabilize</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.35;">
-        <li>reward shortcuts can beat true objective</li>
-        <li>OOV drift can dominate solve performance</li>
-        <li>small regressions in validity kill win-rate</li>
-      </ul>
-    </div>
-  </div>
-</section>
+<div class="sourceCode" id="cb-grpo-reg"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb-grpo-reg-1"><a href="#cb-grpo-reg-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Before GRPO (masked SFT): Strategic, valid guesses</span></span>
+<span id="cb-grpo-reg-2"><a href="#cb-grpo-reg-2" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;guesses&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;CRANE&quot;</span><span class="ot">,</span> <span class="st">&quot;SLOTH&quot;</span><span class="ot">,</span> <span class="st">&quot;WIMPY&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;won&quot;</span><span class="fu">:</span> <span class="kw">true</span> <span class="fu">}</span></span>
+<span id="cb-grpo-reg-3"><a href="#cb-grpo-reg-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb-grpo-reg-4"><a href="#cb-grpo-reg-4" aria-hidden="true" tabindex="-1"></a><span class="co">// After GRPO: Reverts to high-OOV behavior</span></span>
+<span id="cb-grpo-reg-5"><a href="#cb-grpo-reg-5" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;guesses&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;SALET&quot;</span><span class="ot">,</span> <span class="st">&quot;TRONC&quot;</span><span class="ot">,</span> <span class="st">&quot;DIGHT&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;won&quot;</span><span class="fu">:</span> <span class="kw">false</span> <span class="fu">}</span></span></code></pre></div>
 
-<section id="wordle-eval-fixed" class="slide level2 allowframebreaks dense">
-  <h2 class="allowframebreaks">Evaluation: Fixed Targets + Deterministic Decoder</h2>
+<p><strong>Why This Happened:</strong></p>
+<ol>
+<li><strong>Hyperparameter misconfiguration:</strong> <code>num_generations=2</code> in early runs caused 75% of training steps to be skipped (insufficient group size for stable gradients).</li>
+<li><strong>Reward hacking revival:</strong> The model re-discovered that rare/obscure words receive lower penalties in the reward function (they're less likely to repeat or contradict constraints).</li>
+<li><strong>KL divergence collapse:</strong> <code>beta=0.02</code> was too weak to prevent the policy from drifting away from the SFT distribution.</li>
+</ol>
 
-  <p>
-    To compare models fairly, we evaluated every checkpoint on the <b>same 500 targets</b>,
-    with <b>temperature=0</b> and identical prompting. Targets are saved to disk so reruns match exactly.
-  </p>
-
-  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-top:0.8em;">
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Determinism knobs</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.25;">
-        <li><code>TEMPERATURE = 0.0</code></li>
-        <li><code>TOP_P = 1.0</code></li>
-        <li>fixed <code>targets_500.json</code></li>
-        <li>same max turns, same word list</li>
-      </ul>
-    </div>
-
-    <div style="padding:12px; border:1px solid #ddd; border-radius:14px;">
-      <h3 style="margin:0 0 8px 0;">Metrics captured</h3>
-      <ul style="margin:0; padding-left:18px; line-height:1.25;">
-        <li>solve rate / avg turns</li>
-        <li>parse-fail rate</li>
-        <li>OOV / repeat rates</li>
-        <li>candidate reduction (strategy proxy)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div style="margin-top:12px; padding:10px 12px; border-radius:12px; background:#fafafa; border:1px solid #eee;">
-    Evaluator: <code>eval_fixed_set.py</code> (fixed target set + deterministic decoding).
-  </div>
+<p><strong>The Lesson:</strong> RL is <em>fragile</em>. Even a single poorly-tuned hyperparameter can unravel a carefully-crafted SFT baseline. The masked teacher succeeded because it was <em>stable</em>—GRPO introduced instability.</p>
 </section>
 <section class="slide level2 graphic-slide">
   <h2 style="margin:0 0 8px 0;">500-Game Wordle Benchmark (Same 500 targets, deterministic decoding)</h2>
@@ -831,62 +770,47 @@ write({"prompt": prompt, "completion": completion})</code></pre>
     </div>
   </div>
 </section>
-<section id="wordle-takeaways" class="slide level2 allowframebreaks">
-  <h2 class="allowframebreaks">Stacked approach takeaways</h2>
 
-  <ol style="line-height:1.4;">
-    <li>
-      <b>Validity dominates performance.</b> If OOV and repeats spike, win rate collapses—even if candidate reduction looks good.
-    </li>
-    <li>
-      <b>The dataset transformation was critical to improve performance.</b>
-      Prompt/completion + EOS enabled stable <b>completion-only</b> learning.
-    </li>
-    <li>
-      <b>GRPO was fragile here.</b> The RL pressure didn’t reliably improve the win metric and often traded off against action discipline.
-    </li>
-  </ol>
+
+<section id="slide-17-conclusion-light-in-the-tunnel" class="slide level2 allowframebreaks dense">
+<h2 class="allowframebreaks">Conclusion: Failures but with a faint light</h2>
+
+<p><strong>The Goldilocks Discovery:</strong> We set out to document failure, but found a narrow path to success.</p>
+
+<p><strong>What Failed: (Almost) everything </strong></p>
+<ol>
+<li><strong>Format Failure (GPT-2 / Qwen 0.5B):</strong> Too small to follow instructions.</li>
+<li><strong>Objective Failure (Qwen):</strong> Reward hacking ("THINK" as a safe guess).</li>
+<li><strong>Optimization Failure (Gemma):</strong> Model collapse (infinite <code>&lt;think&gt;</code> loop).</li>
+<li><strong>Regression Failure (GRPO on masked SFT):</strong> RL optimization destroyed the stable baseline.</li>
+</ol>
+
+<p><strong>What Worked: Masked SFT Teacher (19% solve rate)</strong></p>
+<ul>
+<li><strong>Completion-only loss:</strong> Focused learning on state→action mapping, not verbose reasoning imitation.</li>
+<li><strong>Teacher-generated trajectories:</strong> Heuristic solver provided consistent, valid demonstrations.</li>
+<li><strong>Simplified objective:</strong> Removed the burden of learning XML reasoning syntax during action selection.</li>
+</ul>
+
+<p><strong>The Critical Prerequisites We Identified:</strong></p>
+<ol>
+<li><strong>Data quality matters:</strong> Context length mismatches (512 vs 4000+ tokens) broke unmasked SFT. Completion-only loss fixed this by isolating the learnable signal.</li>
+<li><strong>Hyperparameters are critical:</strong> <code>num_generations=2</code> caused 75% of GRPO steps to be skipped. <code>beta=0.02</code> was too weak to prevent KL divergence. Proper GRPO likely requires 8+ generations and careful KL tuning.</li>
+</ol>
+
 </section>
+
 <section id="slide-13-conclusion-the-failure-surface"
 class="slide level2 allowframebreaks dense">
 <h2 class="allowframebreaks">Conclusion &amp; The Failure
 Surface</h2>
-<p><strong>Summary of Findings:</strong> We successfully mapped the
-<strong>“Failure Surface”</strong> of GRPO training across three
-distinct regimes:</p>
-<ol type="1">
-<li><strong>Format Failure (GPT-2/Qwen0.5B):</strong> Model too small/weak to
-follow instructions.</li>
-<li><strong>Objective Failure (Qwen):</strong> Reward hacking
-(optimizing for safety over winning).</li>
-<li><strong>Optimization Failure (Gemma):</strong> Model collapse
-(overfitting to specific tokens).</li>
-</ol>
-<p><strong>Final Takeaway:</strong> These failures reveal
-<strong>critical prerequisites for GRPO success</strong>:</p>
-<ol type="1">
-<li><strong>Data quality matters</strong> - Context length mismatches
-(512 vs 4000+ tokens) broke SFT, creating an unstable foundation for
-GRPO.</li>
-<li><strong>Hyperparameters are critical</strong> -
-<code>num_generations=2</code> caused 75% of training steps to be
-skipped. Proper GRPO likely requires 8+ generations.</li>
-<li><strong>Compute constraints are real</strong> - Limited batch sizes,
-epochs, and hardware prevented proper ablation studies and
-hyperparameter tuning.</li>
-</ol>
-</section>
-<section id="slide-13-conclusion-the-failure-surface"
-class="slide level2 allowframebreaks dense">
-<h2 class="allowframebreaks">Slide 13: Conclusion &amp; The Failure
-Surface</h2>
-<p><strong>What we learned:</strong> GRPO didn’t fail because the
+<p><strong>What we learned:</strong> SFT and GRPO are valuable strategies to built a system able to play Wordle. GRPO didn't fail because the
 algorithm is broken—it failed because the <strong>practical
 implementation requirements</strong> (clean data, sufficient compute,
-proper hyperparameters) weren’t met. The failure modes we documented are
+proper hyperparameters) weren't met. The failure modes we documented are
 valuable <strong>warnings</strong> for future work, not evidence that
-GRPO can’t work for structured reasoning tasks.</p>
-</section></section>
+GRPO can't work for structured reasoning tasks.</p>
+</section>
     </div>
   </div>
 
