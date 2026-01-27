@@ -11,7 +11,7 @@ SEED = 42
 random.seed(SEED)
 
 
-# Load the words from your CSV
+# Load the words from CSV
 words_df = pd.read_csv(WORD_LIST_PATH)
 col = "Word" if "Word" in words_df.columns else words_df.columns[0]
 words = words_df[col].astype(str).str.strip().str.upper()
@@ -26,7 +26,7 @@ tokenizer.padding_side = "right"
 STARTERS = ["CRANE","SLATE","TRACE","SALET","ROATE","RAISE","ARISE","AUDIO","STARE"]
 STARTERS = [w for w in STARTERS if w in words_set]
 
-# --- 1. DEFINE FUNCTIONS AT THE TOP ---
+# Functions
 def get_wordle_feedback(guess, target):
     guess = (guess[:5] + "     ")[:5].upper()
     target = target.upper()

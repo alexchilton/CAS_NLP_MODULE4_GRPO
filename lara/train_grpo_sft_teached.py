@@ -18,10 +18,10 @@ from trl import GRPOTrainer, GRPOConfig
 WORD_LIST_PATH = "five_letter_words.csv"
 WORD_COL = "Word"
 
-DATA_JSONL = "wordle_teacher_trajs.jsonl"   # your teacher states
+DATA_JSONL = "wordle_teacher_trajs.jsonl"   #  teacher states
 BASE_MODEL = "Qwen/Qwen2.5-3B-Instruct"
 # SFT_ADAPTER_PATH = "./qwen-wordle-sft-teacher/final_adapter"  # start GRPO from your SFT LoRA
-SFT_ADAPTER_PATH = "./qwen-wordle-grpo/final_adapter"  # start GRPO from your SFT LoRA
+SFT_ADAPTER_PATH = "./qwen-wordle-grpo/final_adapter"  # start GRPO from SFT LoRA
 
 OUT_DIR = "./qwen-wordle-grpo"
 
@@ -32,7 +32,7 @@ os.environ["WANDB_MODE"] = "offline"
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:512"
 
 # ----------------------------
-# WORDLE UTILS (same logic as you used)
+# WORDLE UTILS
 # ----------------------------
 def get_wordle_feedback(guess, target):
     guess = (guess[:5] + "     ")[:5].upper()
@@ -124,7 +124,7 @@ def load_policy():
         attn_implementation="sdpa",
     )
 
-    # attach your SFT LoRA as starting point
+    # SFT LoRA as starting point
     policy = PeftModel.from_pretrained(base, SFT_ADAPTER_PATH)
     policy.train()
     return policy, tok
