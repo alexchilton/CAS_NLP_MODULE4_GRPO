@@ -778,6 +778,7 @@ exhausted.</p>
 <p><strong>The Goldilocks Discovery:</strong> We set out to document failure, but found a narrow path to success.</p>
 
 <p><strong>What Failed: (Almost) everything </strong></p>
+<br>
 <ol>
 <li><strong>Format Failure (GPT-2 / Qwen 0.5B):</strong> Too small to follow instructions.</li>
 <li><strong>Objective Failure (Qwen):</strong> Reward hacking ("THINK" as a safe guess).</li>
@@ -785,18 +786,40 @@ exhausted.</p>
 <li><strong>Regression Failure (GRPO on masked SFT):</strong> RL optimization destroyed the stable baseline.</li>
 </ol>
 
+<br>
+
 <p><strong>What Worked: Masked SFT Teacher (19% solve rate)</strong></p>
+<br>
 <ul>
 <li><strong>Completion-only loss:</strong> Focused learning on state→action mapping, not verbose reasoning imitation.</li>
 <li><strong>Teacher-generated trajectories:</strong> Heuristic solver provided consistent, valid demonstrations.</li>
 <li><strong>Simplified objective:</strong> Removed the burden of learning XML reasoning syntax during action selection.</li>
 </ul>
 
+</section>
+
+<section id="slide-18-lessons-learned" class="slide level2 allowframebreaks">
+<h2 class="allowframebreaks">Lessons Learned</h2>
+
 <p><strong>The Critical Prerequisites We Identified:</strong></p>
+
+<br>
+
 <ol>
 <li><strong>Data quality matters:</strong> Context length mismatches (512 vs 4000+ tokens) broke unmasked SFT. Completion-only loss fixed this by isolating the learnable signal.</li>
+
 <li><strong>Hyperparameters are critical:</strong> <code>num_generations=2</code> caused 75% of GRPO steps to be skipped. <code>beta=0.02</code> was too weak to prevent KL divergence. Proper GRPO likely requires 8+ generations and careful KL tuning.</li>
+
+<li><strong>Stability > Optimization:</strong> The masked SFT teacher achieved 19% by being <em>stable</em> and <em>consistent</em>. GRPO's attempts at optimization introduced fragility that regressed performance.</li>
 </ol>
+<br>
+
+<p><strong>We didn't prove GRPO can't work for Wordle.</strong> We proved that:</p>
+<ul>
+<li>Naive GRPO on raw prompts fails catastrophically (0% solve, 79% OOV).</li>
+<li>Strong SFT baselines can be destroyed by poorly-tuned RL (19% → 1.4%).</li>
+<li>Masked teacher SFT provides a <strong>viable baseline</strong> that future work can build on.</li>
+</ul>
 
 </section>
 
